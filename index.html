@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDTools — All-in-One Utility Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f1a;--surface:#111827;--card:#141c2f;--card-h:#1a2540;
+  --border:#1e2d47;--border-h:#2a3f5f;
+  --text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;
+  --blue:#3b82f6;--blue-bg:rgba(59,130,246,0.1);
+  --teal:#14b8a6;--purple:#8b5cf6;--amber:#f59e0b;--red:#ef4444;--green:#22c55e;
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 800px 500px at 20% -10%,rgba(59,130,246,0.06) 0%,transparent 60%),radial-gradient(ellipse 600px 400px at 80% 100%,rgba(139,92,246,0.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:230px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);padding:20px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{font-size:20px;font-weight:700;color:#fff;padding:8px 12px 20px;letter-spacing:-0.5px}
+.sidebar-logo span{color:var(--blue)}
+.sidebar-section{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:8px 12px 4px;margin-top:8px}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);border:none;background:none;color:var(--dim);font-size:13px;font-family:inherit;cursor:pointer;width:100%;text-align:left;transition:all 0.15s}
+.nav-btn:hover{background:var(--card);color:var(--text)}
+.nav-btn.active{background:var(--blue-bg);color:var(--blue)}
+.nav-count{margin-left:auto;font-size:11px;background:var(--border);padding:1px 6px;border-radius:20px;color:var(--muted)}
+.main{flex:1;padding:28px 32px;overflow-y:auto;min-width:0}
+.topbar{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.page-title{font-size:22px;font-weight:700;color:#fff;flex:1}
+.search-wrap{position:relative;width:300px}
+.search-wrap input{width:100%;padding:10px 16px 10px 40px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:all 0.15s}
+.search-wrap input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+.sort-info{font-size:13px;color:var(--muted);white-space:nowrap}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;text-align:left}
+.tool-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(59,130,246,0.04),transparent);opacity:0;transition:opacity 0.18s}
+.tool-card:hover{background:var(--card-h);border-color:var(--border-h);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.3)}
+.tool-card:hover::before{opacity:1}
+.tc-top{display:flex;align-items:flex-start;gap:12px}
+.tc-icon{width:36px;height:36px;border-radius:9px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tc-info{flex:1;min-width:0}
+.tc-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:3px}
+.tc-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.tc-tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--border);color:var(--muted);font-weight:500}
+.tag.blue{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);color:#93c5fd}
+.badge-new{position:absolute;top:10px;right:10px;background:var(--teal);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;letter-spacing:0.05em}
+.tool-card.hidden{display:none}
+.tool-panel{display:none;background:var(--surface);border-radius:14px;border:1px solid var(--border);overflow:hidden}
+.tool-panel.active{display:block}
+.tp-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.tp-back{background:none;border:1px solid var(--border);color:var(--dim);padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-family:inherit;cursor:pointer;transition:all 0.15s}
+.tp-back:hover{background:var(--card);color:var(--text)}
+.tp-icon{width:40px;height:40px;border-radius:10px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:20px}
+.tp-title{font-size:18px;font-weight:700;color:#fff}
+.tp-desc{font-size:13px;color:var(--muted)}
+.tp-body{padding:24px}
+label{font-size:13px;font-weight:500;color:var(--dim);display:block;margin-bottom:6px}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border 0.15s;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,0.1)}
+textarea{min-height:120px}
+.form-row{margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:var(--radius-sm);border:none;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#2563eb;transform:translateY(-1px)}
+.btn-secondary{background:var(--card);border:1px solid var(--border);color:var(--dim)}
+.btn-secondary:hover{background:var(--card-h);color:var(--text)}
+.btn-green{background:var(--green);color:#fff}
+.btn-green:hover{background:#16a34a}
+.btn-purple{background:var(--purple);color:#fff}
+.btn-amber{background:var(--amber);color:#000}
+.btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.result-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-top:16px;font-size:14px;line-height:1.7;color:var(--text);word-break:break-all}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px}
+.result-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center}
+.result-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px}
+.result-value{font-size:22px;font-weight:700;color:var(--blue)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+pre{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;overflow:auto;font-size:13px;line-height:1.6;color:#a5f3fc;max-height:400px}
+.copy-btn{font-size:12px;padding:4px 10px;background:var(--border);border:none;border-radius:6px;color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:inherit}
+.copy-btn:hover{background:var(--blue);color:#fff}
+.status-ok{color:var(--green);font-weight:600}
+.status-err{color:var(--red);font-weight:600}
+hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.color-preview{width:100%;height:80px;border-radius:var(--radius-sm);border:1px solid var(--border);margin-top:8px;transition:background 0.2s}
+.emoji-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-height:300px;overflow-y:auto}
+.emoji-btn{font-size:22px;padding:6px;border:none;background:var(--card);border-radius:6px;cursor:pointer;transition:transform 0.1s}
+.emoji-btn:hover{transform:scale(1.2)}
+.diff-line{padding:2px 8px;font-size:13px;font-family:monospace;border-radius:4px}
+.diff-add{background:rgba(34,197,94,0.1);color:var(--green)}
+.diff-del{background:rgba(239,68,68,0.1);color:var(--red)}
+.diff-same{color:var(--muted)}
+.filter-thumb{width:80px;height:60px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;object-fit:cover}
+.filter-thumb.active{border-color:var(--blue)}
+.filter-grid{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.filter-item{text-align:center;font-size:11px;color:var(--muted)}
+#scanner-canvas,#editor-canvas,#filter-canvas{max-width:100%;border-radius:12px;border:1px solid var(--border);display:block}
+input[type=range]{width:100%;accent-color:var(--blue);margin:4px 0}
+.info-box{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#93c5fd;margin-bottom:16px}
+.warn-box{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#fcd34d;margin-bottom:16px}
+.sample-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:28px;font-weight:900;color:rgba(239,68,68,0.25);pointer-events:none;letter-spacing:4px;white-space:nowrap}
+@media(max-width:900px){.sidebar{display:none}.tools-grid{grid-template-columns:repeat(2,1fr)}.main{padding:20px 16px}}
+@media(max-width:580px){.tools-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="sidebar-logo">BD<span>Tools</span></div>
+  <div class="sidebar-section">Categories</div>
+  <button class="nav-btn active" onclick="filterCat('all',this)">🔧 All Tools <span class="nav-count" id="cnt-all">55</span></button>
+  <button class="nav-btn" onclick="filterCat('Calculator',this)">🧮 Calculator</button>
+  <button class="nav-btn" onclick="filterCat('Generator',this)">✨ Generator</button>
+  <button class="nav-btn" onclick="filterCat('Converter',this)">🔄 Converter</button>
+  <button class="nav-btn" onclick="filterCat('Editor',this)">✏️ Editor</button>
+  <button class="nav-btn" onclick="filterCat('Image',this)">🖼️ Image</button>
+  <button class="nav-btn" onclick="filterCat('Scanner',this)">📷 Scanner</button>
+  <button class="nav-btn" onclick="filterCat('Bengali',this)">🇧🇩 Bengali</button>
+  <button class="nav-btn" onclick="filterCat('Security',this)">🔒 Security</button>
+  <button class="nav-btn" onclick="filterCat('Online',this)">🌐 Online</button>
+  <div class="sidebar-section">Links</div>
+  <button class="nav-btn">▶ YouTube</button>
+  <button class="nav-btn">✈ Telegram</button>
+</aside>
+<main class="main" id="main">
+  <div id="home-view">
+    <div class="topbar">
+      <div class="page-title">All Tools</div>
+      <div class="search-wrap"><span class="search-icon">🔍</span><input type="text" id="search" placeholder="Search tools..." oninput="applyFilters()"></div>
+      <div class="sort-info" id="sort-info">Showing 55 of 55 tools</div>
+    </div>
+    <div class="tools-grid" id="tools-grid"></div>
+  </div>
+  <div id="tool-view"></div>
+</main>
+</div>
+
+<!-- CDN libs loaded on demand -->
+<script>
+// ── TOOLS DATA ──
+const TOOLS=[
+  {id:'cam-scanner',name:'Camera Scanner',desc:'Scan documents, enhance & convert to PDF',icon:'📄',tags:['Scanner','Image','Online'],isNew:true},
+  {id:'age',name:'Age Calculator',desc:'Calculate exact age from birthdate',icon:'🎂',tags:['Calculator','Online','Free']},
+  {id:'api',name:'API Tester',desc:'Test APIs with GET/POST requests',icon:'🔌',tags:['Online','Free','Development']},
+  {id:'bangla-logo',name:'Bangla Logo Maker',desc:'Create logo with Bangla text',icon:'🎨',tags:['Generator','Bengali','Design']},
+  {id:'bangla-banglish',name:'Bangla to Banglish',desc:'Convert Bangla text to Banglish (Roman)',icon:'🔤',tags:['Converter','Text','Bengali']},
+  {id:'banglish-bangla',name:'Banglish to Bangla',desc:'Convert Banglish to Bangla Unicode',icon:'🔡',tags:['Converter','Text','Bengali']},
+  {id:'bd-train',name:'BD Train Info',desc:'Bangladesh railway schedule & seat checker',icon:'🚂',tags:['Bengali','Online','Free']},
+  {id:'bdix',name:'BDIX Server Tester',desc:'Test BDIX server connection speeds',icon:'⚡',tags:['Online','Free','Development']},
+  {id:'birthday-card',name:'Birthday Card Maker',desc:'Create beautiful birthday cards',icon:'🎉',tags:['Generator','Online','Design'],isNew:true},
+  {id:'blur-faces',name:'Blur Faces / Region',desc:'Blur any region in an image',icon:'🫥',tags:['Editor','Image','Online']},
+  {id:'bmi',name:'BMI Calculator',desc:'Calculate your Body Mass Index',icon:'⚖️',tags:['Calculator','Online','Free']},
+  {id:'board-results',name:'Board Results Checker',desc:'Check BD Education Board Results',icon:'📋',tags:['Bengali','Online','Free']},
+  {id:'color',name:'Color Converter',desc:'Color Picker – HEX, RGB, HSL',icon:'🎨',tags:['Converter','Free','Development']},
+  {id:'courier',name:'Courier Fraud Checker',desc:'Verify BD courier delivery & track',icon:'🛡️',tags:['Online','Free','Security']},
+  {id:'csv-viewer',name:'CSV & XLS Viewer',desc:'View CSV files as a table',icon:'📊',tags:['CSV','Online','Free']},
+  {id:'domain-whois',name:'Domain Whois Lookup',desc:'Lookup domain registration info',icon:'🔍',tags:['Online','Free','Security']},
+  {id:'emoji',name:'Emoji Picker',desc:'Search and copy any emoji',icon:'😄',tags:['Text','Online','Free']},
+  {id:'fb-card',name:'Facebook ID Card Maker',desc:'Create Facebook-style ID Card',icon:'💳',tags:['Generator','Design','Image']},
+  {id:'fake-bd-old',name:'Fake BD Old NID Maker',desc:'Sample BD Old NID Card (educational)',icon:'🪪',tags:['Generator','Design','Bengali']},
+  {id:'fake-bd-smart',name:'Fake BD Smart NID Maker',desc:'Sample BD Smart NID (educational)',icon:'💳',tags:['Generator','Design','Bengali']},
+  {id:'fake-pak',name:'Fake Pakistani CNIC Maker',desc:'Sample Pakistani CNIC (educational)',icon:'🪪',tags:['Generator','Design','Online']},
+  {id:'gemini-wm',name:'Gemini Watermark Remover',desc:'Remove watermark from bottom of images',icon:'✂️',tags:['Editor','Image','Online']},
+  {id:'google-card',name:'Google ID Card Maker',desc:'Create Google-style ID Card',icon:'🔵',tags:['Generator','Design','Image']},
+  {id:'bg-remover',name:'Image Background Remover',desc:'Remove image background (needs API key)',icon:'🖼️',tags:['Editor','Image','Online'],isNew:true},
+  {id:'img-compress',name:'Image Compressor',desc:'Compress and optimize images',icon:'🗜️',tags:['Image','Online','Free']},
+  {id:'img-text',name:'Image Text Extractor',desc:'Extract text from images (OCR)',icon:'📄',tags:['Scanner','Text','Online']},
+  {id:'img-ascii',name:'Image to ASCII Art',desc:'Convert image to ASCII art',icon:'🎭',tags:['Converter','Generator','Text']},
+  {id:'img-base64',name:'Image to Base64',desc:'Convert images to Base64 string',icon:'🔢',tags:['Converter','Image','Online']},
+  {id:'img-emoji',name:'Image To Emoji Art',desc:'Convert image to emoji mosaic',icon:'🌈',tags:['Generator','Image','Online']},
+  {id:'speed',name:'Internet Speed Tester',desc:'Test your internet speed',icon:'📶',tags:['Online','Free','Mobile-Friendly']},
+  {id:'json-fmt',name:'JSON Formatter',desc:'Format and beautify JSON',icon:'{}',tags:['Formatter','Online','Free']},
+  {id:'json-tree',name:'JSON Tree Viewer',desc:'Visualize JSON as interactive tree',icon:'🌳',tags:['Online','Free','Development']},
+  {id:'lorem',name:'Lorem Ipsum Generator',desc:'Generate dummy placeholder text',icon:'📝',tags:['Generator','Text','Online']},
+  {id:'mp3-tag',name:'Mp3 Tag Editor',desc:'Read and edit MP3 ID3 tags',icon:'🎵',tags:['Editor','Online','Free']},
+  {id:'img-editor',name:'Online Image Editor',desc:'Crop, rotate, resize, flip images',icon:'🎨',tags:['Editor','Image','Online']},
+  {id:'pass-gen',name:'Password Generator',desc:'Generate strong random passwords',icon:'🔐',tags:['Generator','Security','Free']},
+  {id:'photo-filter',name:'Photo Filter',desc:'Apply artistic filters to photos',icon:'📷',tags:['Editor','Image','Online']},
+  {id:'qr-make',name:'QR Code Maker',desc:'Create QR codes from text/URL',icon:'⬛',tags:['Generator','Online','Free']},
+  {id:'qr-scan',name:'QR Code Scanner',desc:'Scan QR codes from uploaded images',icon:'📷',tags:['Scanner','Image','Online']},
+  {id:'regex',name:'RegEx Tester',desc:'Test regular expressions live',icon:'🔣',tags:['Editor','Online','Development']},
+  {id:'sec-headers',name:'Security Headers Checker',desc:'Check HTTP security headers of websites',icon:'🔒',tags:['Security','Online','SEO']},
+  {id:'text-logo',name:'Simple Text Logo Maker',desc:'Create text logos on canvas',icon:'🅰️',tags:['Generator','Design','Image']},
+  {id:'student-card',name:'Student ID Card Maker',desc:'Create student ID cards',icon:'🎓',tags:['Generator','Design','Image']},
+  {id:'text-analyze',name:'Text Analyzer',desc:'Count words, chars, sentences',icon:'📊',tags:['Text','Free','SEO']},
+  {id:'text-diff',name:'Text Diff Checker',desc:'Compare two texts side-by-side',icon:'≠',tags:['Editor','Text','Online']},
+  {id:'text-ascii',name:'Text to ASCII Art',desc:'Convert text to block ASCII art',icon:'🔠',tags:['Converter','Generator','Text']},
+  {id:'typing',name:'Typing Test',desc:'Measure your typing speed (WPM)',icon:'⌨️',tags:['Text','Online','Free']},
+  {id:'unicode-bijoy',name:'Unicode to Bijoy',desc:'Convert Unicode Bengali to Bijoy font',icon:'🔄',tags:['Converter','Text','Bengali']},
+  {id:'url-expand',name:'URL Expander',desc:'Expand short URLs to full links',icon:'🔗',tags:['Online','Free','SEO']},
+  {id:'url-parse',name:'URL Parser',desc:'Parse and analyze any URL',icon:'🔍',tags:['Converter','Online','Free']},
+  {id:'url-short',name:'URL Shortener',desc:'Shorten long URLs via TinyURL',icon:'✂️',tags:['Online','Free','SEO']},
+  {id:'visiting-card',name:'Visiting Card Maker',desc:'Design printable business cards',icon:'💼',tags:['Generator','Design','Image']},
+  {id:'encode-decode',name:'Encode & Decode',desc:'Base64, URL, HTML encoding',icon:'⇄',tags:['Converter','Development','Free']},
+  {id:'pass-strength',name:'Password Strength Checker',desc:'Check how strong your password is',icon:'💪',tags:['Security','Free','Online']},
+  {id:'unit-convert',name:'Unit Converter',desc:'Convert length, weight, temperature',icon:'📐',tags:['Calculator','Free','Online']},
+];
+
+// ── RENDER ──
+function renderCards(list){
+  const g=document.getElementById('tools-grid');
+  g.innerHTML=list.map(t=>`
+    <div class="tool-card" onclick="openTool('${t.id}')">
+      ${t.isNew?'<span class="badge-new">NEW</span>':''}
+      <div class="tc-top">
+        <div class="tc-icon">${t.icon}</div>
+        <div class="tc-info"><div class="tc-name">${t.name}</div><div class="tc-desc">${t.desc}</div></div>
+      </div>
+      <div class="tc-tags">${t.tags.slice(0,3).map(tg=>`<span class="tag blue">${tg}</span>`).join('')}</div>
+    </div>`).join('');
+  document.getElementById('sort-info').textContent=`Showing ${list.length} of ${TOOLS.length} tools`;
+}
+let activeFilter='all';
+function filterCat(cat,btn){activeFilter=cat;document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');applyFilters();}
+function applyFilters(){
+  const q=document.getElementById('search').value.toLowerCase();
+  let list=TOOLS;
+  if(activeFilter!=='all') list=list.filter(t=>t.tags.some(tg=>tg===activeFilter));
+  if(q) list=list.filter(t=>t.name.toLowerCase().includes(q)||t.desc.toLowerCase().includes(q));
+  renderCards(list);
+}
+function openTool(id){
+  const t=TOOLS.find(x=>x.id===id);if(!t) return;
+  const html=PANELS[id]?PANELS[id](t):`<div class="warn-box">This tool is coming soon!</div>`;
+  document.getElementById('home-view').style.display='none';
+  document.getElementById('tool-view').innerHTML=`
+    <div class="tool-panel active">
+      <div class="tp-header">
+        <button class="tp-back" onclick="closeTool()">← Back</button>
+        <div class="tp-icon">${t.icon}</div>
+        <div><div class="tp-title">${t.name}</div><div class="tp-desc">${t.desc}</div></div>
+      </div>
+      <div class="tp-body">${html}</div>
+    </div>`;
+  if(INITS[id]) setTimeout(()=>INITS[id](),60);
+  window.scrollTo(0,0);
+}
+function closeTool(){document.getElementById('home-view').style.display='';document.getElementById('tool-view').innerHTML='';}
+function copyText(el){const t=el.dataset.copy||'';navigator.clipboard.writeText(t).then(()=>{const o=el.textContent;el.textContent='Copied!';setTimeout(()=>el.textContent=o,1500)});}
+function loadScript(src,cb){if(document.querySelector(`script[src="${src}"]`)){cb&&cb();return;}const s=document.createElement('script');s.src=src;s.onload=cb;document.head.appendChild(s);}
+
+const PANELS={},INITS={};
+
+// ══════════════════════════════════════════════
+// 1. CAMERA SCANNER
+// ══════════════════════════════════════════════
+PANELS['cam-scanner']=()=>`
+<div class="info-box">📄 Upload a document photo to apply scan effects and convert to PDF. Works like CamScanner — no app needed!</div>
+<div class="form-row"><label>Upload Document Photo</label>
+  <input type="file" id="cs-file" accept="image/*" onchange="csLoadImage()" style="color:var(--text)">
+</div>
+<div id="cs-controls" style="display:none">
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="btn btn-primary" onclick="csEffect('bw')">⬛ B&W Scan</button>
+    <button class="btn btn-secondary" onclick="csEffect('gray')">🔲 Grayscale</button>
+    <button class="btn btn-secondary" onclick="csEffect('enhance')">✨ Enhance</button>
+    <button class="btn btn-secondary" onclick="csEffect('original')">🖼️ Original</button>
+    <button class="btn btn-secondary" onclick="csRotate()">↻ Rotate 90°</button>
+  </div>
+  <div class="form-grid">
+    <div><label>Brightness: <span id="cs-bl">100</span>%</label><input type="range" min="50" max="200" value="100" id="cs-b" oninput="document.getElementById('cs-bl').textContent=this.value;csApplyAdj()"></div>
+    <div><label>Contrast: <span id="cs-cl">100</span>%</label><input type="range" min="50" max="300" value="100" id="cs-c" oninput="document.getElementById('cs-cl').textContent=this.value;csApplyAdj()"></div>
+  </div>
+  <canvas id="scanner-canvas" style="max-width:100%;border-radius:12px;border:1px solid var(--border);display:block;margin-bottom:16px"></canvas>
+  <div class="btn-row">
+    <button class="btn btn-green" onclick="csDownloadPDF()">⬇ Download PDF</button>
+    <button class="btn btn-secondary" onclick="csDownloadPNG()">⬇ Download PNG</button>
+  </div>
+</div>`;
+let csImg=null,csRotDeg=0,csCurrentEffect='original';
+window.csLoadImage=function(){
+  const f=document.getElementById('cs-file').files[0];if(!f)return;
+  const img=new Image();img.onload=()=>{csImg=img;csRotDeg=0;document.getElementById('cs-controls').style.display='block';csRender();};
+  img.src=URL.createObjectURL(f);
+};
+window.csEffect=function(e){csCurrentEffect=e;csRender();}
+window.csRotate=function(){csRotDeg=(csRotDeg+90)%360;csRender();}
+window.csApplyAdj=function(){csRender();}
+function csRender(){
+  if(!csImg) return;
+  const c=document.getElementById('scanner-canvas');
+  const rotated=csRotDeg===90||csRotDeg===270;
+  c.width=rotated?csImg.height:csImg.width;c.height=rotated?csImg.width:csImg.height;
+  const ctx=c.getContext('2d');
+  ctx.save();ctx.translate(c.width/2,c.height/2);ctx.rotate(csRotDeg*Math.PI/180);
+  ctx.drawImage(csImg,-csImg.width/2,-csImg.height/2);ctx.restore();
+  const bright=+document.getElementById('cs-b').value/100;
+  const contr=+document.getElementById('cs-c').value/100;
+  const id=ctx.getImageData(0,0,c.width,c.height);const d=id.data;
+  for(let i=0;i<d.length;i+=4){
+    let r=d[i],g=d[i+1],b=d[i+2];
+    r=Math.min(255,r*bright);g=Math.min(255,g*bright);b=Math.min(255,b*bright);
+    r=Math.min(255,Math.max(0,((r/255-0.5)*contr+0.5)*255));
+    g=Math.min(255,Math.max(0,((g/255-0.5)*contr+0.5)*255));
+    b=Math.min(255,Math.max(0,((b/255-0.5)*contr+0.5)*255));
+    if(csCurrentEffect==='gray'||csCurrentEffect==='bw'){const gr=0.299*r+0.587*g+0.114*b;r=g=b=gr;}
+    if(csCurrentEffect==='bw'){const t=r>128?255:0;r=g=b=t;}
+    if(csCurrentEffect==='enhance'){r=Math.min(255,r*1.1);g=Math.min(255,g*1.1);b=Math.min(255,b*1.1);}
+    d[i]=r;d[i+1]=g;d[i+2]=b;
+  }
+  ctx.putImageData(id,0,0);
+}
+window.csDownloadPNG=function(){
+  const a=document.createElement('a');a.download='scanned.png';a.href=document.getElementById('scanner-canvas').toDataURL();a.click();
+};
+window.csDownloadPDF=function(){
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>{
+    const c=document.getElementById('scanner-canvas');
+    const {jsPDF}=window.jspdf;
+    const w=c.width,h=c.height;
+    const orient=w>h?'l':'p';
+    const pdf=new jsPDF({orientation:orient,unit:'px',format:[w,h]});
+    pdf.addImage(c.toDataURL('image/jpeg',0.95),'JPEG',0,0,w,h);
+    pdf.save('scanned-document.pdf');
+  });
+};
+
+// ══════════════════════════════════════════════
+// 2. AGE CALCULATOR
+// ══════════════════════════════════════════════
+PANELS['age']=()=>`
+<div class="form-grid">
+  <div><label>Date of Birth</label><input type="date" id="ag-dob" max="${new Date().toISOString().split('T')[0]}"></div>
+  <div><label>Calculate on</label><input type="date" id="ag-today" value="${new Date().toISOString().split('T')[0]}"></div>
+</div>
+<button class="btn btn-primary" onclick="calcAge()">Calculate Age</button>
+<div id="ag-result"></div>`;
+window.calcAge=function(){
+  const dob=new Date(document.getElementById('ag-dob').value);
+  const ref=new Date(document.getElementById('ag-today').value);
+  if(isNaN(dob)||isNaN(ref))return;
+  let y=ref.getFullYear()-dob.getFullYear(),m=ref.getMonth()-dob.getMonth(),d=ref.getDate()-dob.getDate();
+  if(d<0){m--;d+=new Date(ref.getFullYear(),ref.getMonth(),0).getDate();}
+  if(m<0){y--;m+=12;}
+  const td=Math.floor((ref-dob)/86400000);
+  const nxt=new Date(ref.getFullYear()+(ref.getMonth()>dob.getMonth()||(ref.getMonth()===dob.getMonth()&&ref.getDate()>=dob.getDate())?1:0),dob.getMonth(),dob.getDate());
+  const daysToNext=Math.floor((nxt-ref)/86400000);
+  document.getElementById('ag-result').innerHTML=`
+  <div class="result-grid">
+    <div class="result-item"><div class="result-label">Years</div><div class="result-value">${y}</div></div>
+    <div class="result-item"><div class="result-label">Months</div><div class="result-value">${m}</div></div>
+    <div class="result-item"><div class="result-label">Days</div><div class="result-value">${d}</div></div>
+    <div class="result-item"><div class="result-label">Total Days</div><div class="result-value" style="font-size:16px">${td.toLocaleString()}</div></div>
+    <div class="result-item"><div class="result-label">Next Birthday</div><div class="result-value" style="font-size:15px">${daysToNext} days</div></div>
+    <div class="result-item"><div class="result-label">Total Weeks</div><div class="result-value" style="font-size:16px">${Math.floor(td/7).toLocaleString()}</div></div>
+  </div>`;
+};
+
+// ══════════════════════════════════════════════
+// 3. BANGLA LOGO MAKER
+// ══════════════════════════════════════════════
+PANELS['bangla-logo']=()=>`
+<div class="form-row"><label>Bangla or English Text</label><input type="text" id="bl-text" value="বাংলাদেশ" placeholder="আপনার লেখা লিখুন"></div>
+<div class="form-grid">
+  <div><label>Font Size</label><input type="range" min="30" max="120" value="72" id="bl-fs" oninput="makeBLogo()"></div>
+  <div><label>Text Color</label><input type="color" id="bl-tc" value="#22c55e" oninput="makeBLogo()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Background</label><input type="color" id="bl-bg" value="#0a0f1a" oninput="makeBLogo()"></div>
+  <div><label>Style</label>
+    <select id="bl-st" onchange="makeBLogo()"><option value="normal">Normal</option><option value="bold">Bold</option><option value="outline">Outline</option><option value="shadow">Shadow</option></select>
+  </div>
+</div>
+<button class="btn btn-primary" onclick="downloadBLogo()">⬇ Download Logo</button>
+<canvas id="bl-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border);display:block"></canvas>`;
+INITS['bangla-logo']=()=>makeBLogo();
+window.makeBLogo=function(){
+  const text=document.getElementById('bl-text').value||'বাংলা';
+  const fs=+document.getElementById('bl-fs').value;
+  const tc=document.getElementById('bl-tc').value;
+  const bg=document.getElementById('bl-bg').value;
+  const st=document.getElementById('bl-st').value;
+  const c=document.getElementById('bl-canvas');
+  c.width=Math.max(text.length*fs*0.8,300)+80;c.height=fs*2.2;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);
+  const font=`${st==='bold'?'bold ':''} ${fs}px serif`;
+  ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';
+  if(st==='shadow'){ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=10;ctx.shadowOffsetX=3;ctx.shadowOffsetY=3;}
+  if(st==='outline'){ctx.strokeStyle=tc;ctx.lineWidth=3;ctx.strokeText(text,c.width/2,c.height/2);}
+  ctx.fillStyle=tc;ctx.fillText(text,c.width/2,c.height/2);
+  ctx.shadowBlur=0;
+};
+window.downloadBLogo=function(){makeBLogo();const a=document.createElement('a');a.download='bangla-logo.png';a.href=document.getElementById('bl-canvas').toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 4. BANGLA TO BANGLISH
+// ══════════════════════════════════════════════
+const B2BL_MAP={'অ':'o','আ':'a','ই':'i','ঈ':'i','উ':'u','ঊ':'u','এ':'e','ও':'o','ঐ':'oi','ঔ':'ou','ক':'k','খ':'kh','গ':'g','ঘ':'gh','ঙ':'ng','চ':'ch','ছ':'chh','জ':'j','ঝ':'jh','ঞ':'n','ট':'t','ঠ':'th','ড':'d','ঢ':'dh','ণ':'n','ত':'t','থ':'th','দ':'d','ধ':'dh','ন':'n','প':'p','ফ':'ph','ব':'b','ভ':'bh','ম':'m','য':'j','র':'r','ল':'l','শ':'sh','ষ':'sh','স':'s','হ':'h','ড়':'r','ঢ়':'rh','য়':'y','ৎ':'t','ং':'ng','ঃ':'h','ঁ':'n','া':'a','ি':'i','ী':'i','ু':'u','ূ':'u','ে':'e','ো':'o','ৈ':'oi','ৌ':'ou','ৃ':'ri','্':'',' ':' '};
+PANELS['bangla-banglish']=()=>`
+<div class="form-row"><label>Bangla Text (বাংলা)</label><textarea id="bb-in" placeholder="এখানে বাংলা লিখুন...">আমার সোনার বাংলা</textarea></div>
+<button class="btn btn-primary" onclick="bangla2banglish()">Convert to Banglish</button>
+<div id="bb-result"></div>`;
+window.bangla2banglish=function(){
+  const t=document.getElementById('bb-in').value;
+  let out='';
+  for(const ch of t){out+=B2BL_MAP[ch]!==undefined?B2BL_MAP[ch]:ch;}
+  document.getElementById('bb-result').innerHTML=`
+    <div class="result-box" style="display:flex;justify-content:space-between;align-items:flex-start">
+      <span style="flex:1">${out}</span>
+      <button class="copy-btn" data-copy="${out}" onclick="copyText(this)">Copy</button>
+    </div>`;
+};
+
+// ══════════════════════════════════════════════
+// 5. BANGLISH TO BANGLA
+// ══════════════════════════════════════════════
+PANELS['banglish-bangla']=()=>`
+<div class="form-row"><label>Banglish Text (Roman)</label><textarea id="blb-in" placeholder="Type in Banglish e.g: amar shonar bangla...">amar shonar bangla</textarea></div>
+<button class="btn btn-primary" onclick="banglish2bangla()">Convert to Bangla</button>
+<div class="info-box" style="margin-top:12px">💡 Uses common Bangla phonetics. Result may need manual review for accuracy.</div>
+<div id="blb-result"></div>`;
+const BL2B_MAP=[
+  ['kh','খ'],['gh','ঘ'],['ng','ং'],['chh','ছ'],['ch','চ'],['jh','ঝ'],['th','থ'],['dh','ধ'],['ph','ফ'],['bh','ভ'],['sh','শ'],['rh','ঢ়'],
+  ['aa','আ'],['ii','ঈ'],['uu','ঊ'],['oi','ঐ'],['ou','ঔ'],
+  ['a','আ'],['i','ই'],['u','উ'],['e','এ'],['o','ও'],
+  ['k','ক'],['g','গ'],['c','চ'],['j','জ'],['t','ত'],['d','দ'],['n','ন'],['p','প'],['b','ব'],['m','ম'],['y','য'],['r','র'],['l','ল'],['s','স'],['h','হ'],['f','ফ'],
+];
+window.banglish2bangla=function(){
+  let t=document.getElementById('blb-in').value.toLowerCase();
+  for(const[en,bn] of BL2B_MAP) t=t.split(en).join(bn);
+  document.getElementById('blb-result').innerHTML=`
+    <div class="result-box" style="font-size:20px;display:flex;justify-content:space-between">
+      <span>${t}</span>
+      <button class="copy-btn" data-copy="${t}" onclick="copyText(this)">Copy</button>
+    </div>`;
+};
+
+// ══════════════════════════════════════════════
+// 6. BD TRAIN INFO
+// ══════════════════════════════════════════════
+PANELS['bd-train']=()=>`
+<div class="info-box">🚂 Quick links to official Bangladesh Railway services</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+  ${[['🎟️ Buy Train Ticket','https://eticket.railway.gov.bd/','Buy online train tickets from BR eTicket portal'],
+     ['📅 Train Schedule','https://railway.gov.bd/','Check train schedules and routes'],
+     ['🔍 Track Your Train','https://bdtickets.com/','Live train tracking'],
+     ['💺 Check Seat Availability','https://eticket.railway.gov.bd/','View available seats for your journey']
+    ].map(([name,url,desc])=>`
+    <a href="${url}" target="_blank" style="text-decoration:none">
+      <div class="tool-card" style="gap:8px">
+        <div style="font-size:24px">${name.split(' ')[0]}</div>
+        <div style="font-size:14px;font-weight:600;color:#fff">${name.slice(name.indexOf(' ')+1)}</div>
+        <div style="font-size:12px;color:var(--muted)">${desc}</div>
+        <span style="font-size:12px;color:var(--blue)">Open ↗</span>
+      </div>
+    </a>`).join('')}
+</div>`;
+
+// ══════════════════════════════════════════════
+// 7. BDIX SERVER TESTER
+// ══════════════════════════════════════════════
+PANELS['bdix']=()=>`
+<div class="info-box">⚡ Tests connection speed to various servers. BDIX results only visible from BD ISPs that support BDIX.</div>
+<button class="btn btn-primary" onclick="testBdix()">▶ Start BDIX Test</button>
+<div id="bdix-result"></div>`;
+window.testBdix=async function(){
+  const servers=[
+    {name:'Google (International)',url:'https://www.google.com/favicon.ico'},
+    {name:'Cloudflare',url:'https://1.1.1.1/favicon.ico'},
+    {name:'GitHub',url:'https://github.com/favicon.ico'},
+    {name:'BDjobs.com',url:'https://bdjobs.com/favicon.ico'},
+    {name:'Prothomalo',url:'https://prothomalo.com/favicon.ico'},
+  ];
+  const r=document.getElementById('bdix-result');
+  r.innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Testing servers...</div>';
+  const rows=[];
+  for(const s of servers){
+    const t0=performance.now();
+    try{await fetch(s.url+'?t='+Date.now(),{mode:'no-cors',cache:'no-store'});const ms=(performance.now()-t0).toFixed(0);rows.push({n:s.name,ms:+ms,ok:true});}
+    catch{rows.push({n:s.name,ms:9999,ok:false});}
+  }
+  r.innerHTML=`<div class="result-box" style="margin-top:12px">
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr><th style="text-align:left;padding:6px 0;color:var(--muted)">Server</th><th style="text-align:right;color:var(--muted)">Latency</th><th style="text-align:right;color:var(--muted)">Status</th></tr>
+      ${rows.map(r=>`<tr><td style="padding:7px 0;color:var(--text)">${r.n}</td>
+        <td style="text-align:right;color:${r.ms<100?'var(--green)':r.ms<300?'var(--amber)':'var(--red)'}">${r.ok?r.ms+'ms':'—'}</td>
+        <td style="text-align:right">${r.ok?'<span class="status-ok">Online</span>':'<span class="status-err">Error</span>'}</td></tr>`).join('')}
+    </table></div>`;
+};
+
+// ══════════════════════════════════════════════
+// 8. BIRTHDAY CARD
+// ══════════════════════════════════════════════
+PANELS['birthday-card']=()=>`
+<div class="form-grid">
+  <div><label>Recipient Name</label><input type="text" id="bc-name" placeholder="e.g. Rahim" oninput="makeCard()"></div>
+  <div><label>From</label><input type="text" id="bc-from" placeholder="e.g. Your Friend" oninput="makeCard()"></div>
+</div>
+<div class="form-row"><label>Message</label><textarea id="bc-msg" oninput="makeCard()">Wishing you joy, happiness and all the best on your special day! 🎉</textarea></div>
+<div class="form-row"><label>Theme</label>
+  <select id="bc-theme" onchange="makeCard()"><option value="blue">Ocean Blue</option><option value="purple">Royal Purple</option><option value="green">Forest Green</option><option value="dark">Dark Gold</option></select>
+</div>
+<div id="bc-result"></div>
+<button class="btn btn-secondary" onclick="window.print()" style="margin-top:12px">🖨 Print Card</button>`;
+const BC_THEMES={blue:{bg:'linear-gradient(135deg,#0a1628,#1e3a5f)',acc:'#60a5fa'},purple:{bg:'linear-gradient(135deg,#1a0a2e,#3b1f6e)',acc:'#c084fc'},green:{bg:'linear-gradient(135deg,#0a1f0f,#14532d)',acc:'#4ade80'},dark:{bg:'linear-gradient(135deg,#1a1400,#3d2e00)',acc:'#fbbf24'}};
+window.makeCard=function(){
+  const n=document.getElementById('bc-name').value||'Friend';
+  const fr=document.getElementById('bc-from').value||'A Friend';
+  const msg=document.getElementById('bc-msg').value;
+  const th=BC_THEMES[document.getElementById('bc-theme').value];
+  document.getElementById('bc-result').innerHTML=`
+    <div style="margin-top:16px;background:${th.bg};border-radius:16px;padding:40px;text-align:center;border:1px solid ${th.acc}30;max-width:500px">
+      <div style="font-size:52px;margin-bottom:10px">🎂🎉🎊</div>
+      <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:${th.acc};margin-bottom:8px">HAPPY BIRTHDAY</div>
+      <div style="font-size:38px;font-weight:700;color:#fff;margin-bottom:14px;font-family:serif">${n}</div>
+      <div style="color:#ccc;font-size:14px;line-height:1.9;max-width:360px;margin:0 auto">${msg}</div>
+      <div style="margin-top:24px;padding-top:16px;border-top:1px solid ${th.acc}40;font-size:13px;color:${th.acc}">💝 With love from ${fr}</div>
+    </div>`;
+};
+INITS['birthday-card']=()=>makeCard();
+
+// ══════════════════════════════════════════════
+// 9. BLUR FACES / REGION
+// ══════════════════════════════════════════════
+PANELS['blur-faces']=()=>`
+<div class="info-box">🖌 Upload an image, then click and drag to select regions to blur.</div>
+<div class="form-row"><label>Upload Image</label><input type="file" id="bf-file" accept="image/*" onchange="bfLoad()" style="color:var(--text)"></div>
+<div id="bf-controls" style="display:none">
+  <div class="form-row"><label>Blur Strength: <span id="bf-sl">15</span></label><input type="range" min="5" max="40" value="15" id="bf-s" oninput="document.getElementById('bf-sl').textContent=this.value"></div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Click and drag on image to blur a region</div>
+  <canvas id="bf-canvas" style="max-width:100%;cursor:crosshair;border-radius:12px;border:1px solid var(--border)"></canvas>
+  <div class="btn-row" style="margin-top:12px">
+    <button class="btn btn-primary" onclick="bfDownload()">⬇ Download</button>
+    <button class="btn btn-secondary" onclick="bfUndo()">↩ Undo Last</button>
+  </div>
+</div>`;
+let bfCtx,bfW,bfH,bfHistory=[];
+window.bfLoad=function(){
+  const img=new Image();img.onload=()=>{
+    const c=document.getElementById('bf-canvas');
+    bfW=img.width;bfH=img.height;
+    const scale=Math.min(1,700/bfW);c.width=bfW*scale;c.height=bfH*scale;
+    bfCtx=c.getContext('2d');bfCtx.drawImage(img,0,0,c.width,c.height);
+    bfHistory=[bfCtx.getImageData(0,0,c.width,c.height)];
+    document.getElementById('bf-controls').style.display='block';
+    let dragging=false,sx,sy;
+    c.onmousedown=e=>{const r=c.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;dragging=true;};
+    c.onmouseup=e=>{
+      if(!dragging)return;dragging=false;
+      const r=c.getBoundingClientRect();const ex=e.clientX-r.left,ey=e.clientY-r.top;
+      const x=Math.min(sx,ex),y=Math.min(sy,ey),w=Math.abs(ex-sx),h=Math.abs(ey-sy);
+      if(w<5||h<5)return;
+      const str=+document.getElementById('bf-s').value;
+      bfHistory.push(bfCtx.getImageData(0,0,c.width,c.height));
+      bfBlurRegion(bfCtx,x,y,w,h,str);
+    };
+  };img.src=URL.createObjectURL(document.getElementById('bf-file').files[0]);
+};
+function bfBlurRegion(ctx,x,y,w,h,r){
+  const id=ctx.getImageData(x,y,w,h);const d=id.data;
+  for(let i=0;i<h;i+=r) for(let j=0;j<w;j+=r){
+    let ra=0,ga=0,ba=0,cnt=0;
+    for(let di=0;di<r&&i+di<h;di++) for(let dj=0;dj<r&&j+dj<w;dj++){
+      const idx=((i+di)*w+(j+dj))*4;ra+=d[idx];ga+=d[idx+1];ba+=d[idx+2];cnt++;
+    }
+    ra=ra/cnt;ga=ga/cnt;ba=ba/cnt;
+    for(let di=0;di<r&&i+di<h;di++) for(let dj=0;dj<r&&j+dj<w;dj++){
+      const idx=((i+di)*w+(j+dj))*4;d[idx]=ra;d[idx+1]=ga;d[idx+2]=ba;
+    }
+  }
+  ctx.putImageData(id,x,y);
+}
+window.bfUndo=function(){if(bfHistory.length>1){bfHistory.pop();bfCtx.putImageData(bfHistory[bfHistory.length-1],0,0);}};
+window.bfDownload=function(){const a=document.createElement('a');a.download='blurred.png';a.href=document.getElementById('bf-canvas').toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 10. BMI
+// ══════════════════════════════════════════════
+PANELS['bmi']=()=>`
+<div class="form-grid">
+  <div><label>Weight (kg)</label><input type="number" id="bm-w" placeholder="e.g. 70"></div>
+  <div><label>Height (cm)</label><input type="number" id="bm-h" placeholder="e.g. 175"></div>
+</div>
+<button class="btn btn-primary" onclick="calcBmi()">Calculate BMI</button>
+<div id="bm-result"></div>`;
+window.calcBmi=function(){
+  const w=+document.getElementById('bm-w').value,h=+document.getElementById('bm-h').value/100;
+  if(!w||!h)return;
+  const bmi=(w/(h*h)).toFixed(1);
+  let cat='',col='';
+  if(bmi<18.5){cat='Underweight';col='#60a5fa'}else if(bmi<25){cat='Normal';col='var(--green)'}else if(bmi<30){cat='Overweight';col='var(--amber)'}else{cat='Obese';col='var(--red)'}
+  document.getElementById('bm-result').innerHTML=`
+  <div class="result-grid">
+    <div class="result-item"><div class="result-label">BMI</div><div class="result-value" style="color:${col}">${bmi}</div></div>
+    <div class="result-item"><div class="result-label">Category</div><div class="result-value" style="font-size:16px;color:${col}">${cat}</div></div>
+    <div class="result-item"><div class="result-label">Ideal Weight</div><div class="result-value" style="font-size:15px">${(18.5*h*h).toFixed(1)}–${(24.9*h*h).toFixed(1)} kg</div></div>
+  </div>`;
+};
+
+// ══════════════════════════════════════════════
+// 11. BOARD RESULTS
+// ══════════════════════════════════════════════
+PANELS['board-results']=()=>`
+<div class="info-box">📋 Check BD Education Board results from official sources</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+  ${[['📊 eBoard Results','https://eboardresults.com/v2/stud','SSC, HSC, JSC results'],
+     ['🏫 Board Website','http://www.educationboardresults.gov.bd/','Official BD education board portal'],
+     ['📱 Result BD','https://resultbd.com/','Result check with roll/reg'],
+     ['📚 Dhaka Board','http://dhakaeducationboard.gov.bd/','Dhaka board official site'],
+    ].map(([n,u,d])=>`<a href="${u}" target="_blank" style="text-decoration:none"><div class="tool-card">
+      <div style="font-size:24px">${n.split(' ')[0]}</div>
+      <div style="font-size:14px;font-weight:600;color:#fff">${n.slice(3)}</div>
+      <div style="font-size:12px;color:var(--muted)">${d}</div>
+      <span style="font-size:12px;color:var(--blue)">Open ↗</span>
+    </div></a>`).join('')}
+</div>`;
+
+// ══════════════════════════════════════════════
+// 12. COLOR CONVERTER
+// ══════════════════════════════════════════════
+PANELS['color']=()=>`
+<div class="form-grid">
+  <div><label>Pick Color</label><input type="color" id="cl-pick" value="#3b82f6" oninput="updateColor()" style="height:48px;cursor:pointer"></div>
+  <div><label>Enter HEX</label><input type="text" id="cl-hex" value="#3b82f6" oninput="hexChanged()"></div>
+</div>
+<div id="cl-preview" class="color-preview" style="background:#3b82f6"></div>
+<div class="result-grid" id="cl-results" style="margin-top:12px"></div>`;
+function hexToRgb(h){const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);return r?[parseInt(r[1],16),parseInt(r[2],16),parseInt(r[3],16)]:null;}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn){h=s=0;}else{const d=mx-mn;s=l>0.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;case b:h=(r-g)/d+4;}h/=6;}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)];}
+window.updateColor=function(){const h=document.getElementById('cl-pick').value;document.getElementById('cl-hex').value=h;showColor(h);};
+window.hexChanged=function(){const h=document.getElementById('cl-hex').value;if(/^#[0-9a-f]{6}$/i.test(h)){document.getElementById('cl-pick').value=h;showColor(h);}};
+function showColor(h){document.getElementById('cl-preview').style.background=h;const rgb=hexToRgb(h);if(!rgb)return;const hsl=rgbToHsl(...rgb);const items=[{l:'HEX',v:h.toUpperCase()},{l:'RGB',v:`rgb(${rgb.join(', ')})`},{l:'HSL',v:`hsl(${hsl[0]}, ${hsl[1]}%, ${hsl[2]}%)`},{l:'RGBA',v:`rgba(${rgb.join(', ')}, 1)`},{l:'R',v:rgb[0]},{l:'G',v:rgb[1]},{l:'B',v:rgb[2]}];document.getElementById('cl-results').innerHTML=items.map(i=>`<div class="result-item"><div class="result-label">${i.l}</div><div style="font-size:13px;font-weight:600;color:var(--text)">${i.v}</div><button class="copy-btn" data-copy="${i.v}" onclick="copyText(this)" style="margin-top:4px">Copy</button></div>`).join('');}
+INITS['color']=()=>showColor('#3b82f6');
+
+// ══════════════════════════════════════════════
+// 13. COURIER FRAUD CHECKER
+// ══════════════════════════════════════════════
+PANELS['courier']=()=>`
+<div class="info-box">🛡️ Track your courier and check for fraud risk using official BD courier sites</div>
+<div class="form-row"><label>Enter Tracking Number</label><input type="text" id="cf-track" placeholder="e.g. SA12345678BD"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+  ${[['📦 Pathao Courier','https://pathao.com/tracking/','Track Pathao parcel'],
+     ['🚚 Paperfly','https://paperfly.com.bd/tracking','Track Paperfly parcel'],
+     ['📮 Sundarban Courier','https://sundarbancourier.com/','Track Sundarban parcel'],
+     ['🏪 RedX','https://redx.com.bd/track/','Track RedX parcel'],
+    ].map(([n,u,d])=>`<a href="${u}" target="_blank" style="text-decoration:none"><div class="tool-card">
+      <div style="font-size:20px">${n.split(' ')[0]}</div>
+      <div style="font-size:13px;font-weight:600;color:#fff">${n.slice(3)}</div>
+      <div style="font-size:12px;color:var(--muted)">${d}</div>
+    </div></a>`).join('')}
+</div>`;
+
+// ══════════════════════════════════════════════
+// 14. CSV VIEWER
+// ══════════════════════════════════════════════
+PANELS['csv-viewer']=()=>`
+<div class="form-row"><label>Upload CSV File</label><input type="file" id="cv-file" accept=".csv,.tsv" onchange="loadCsv()" style="color:var(--text)"></div>
+<textarea id="cv-text" placeholder="Or paste CSV data here:&#10;name,age,city&#10;Alice,25,Dhaka" style="min-height:80px;margin-bottom:10px"></textarea>
+<button class="btn btn-primary" onclick="viewCsv()">View Table</button>
+<div id="cv-result" style="overflow-x:auto;margin-top:12px"></div>`;
+window.loadCsv=function(){const f=document.getElementById('cv-file').files[0];if(!f)return;const r=new FileReader();r.onload=e=>{document.getElementById('cv-text').value=e.target.result;viewCsv();};r.readAsText(f);};
+window.viewCsv=function(){const raw=document.getElementById('cv-text').value.trim();if(!raw)return;const rows=raw.split('\n').map(r=>r.split(',').map(c=>c.trim()));const header=rows[0];const body=rows.slice(1);document.getElementById('cv-result').innerHTML=`<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>${header.map(h=>`<th style="background:var(--card-h);padding:8px 12px;text-align:left;border:1px solid var(--border);color:var(--blue)">${h}</th>`).join('')}</tr></thead><tbody>${body.filter(r=>r[0]).map((row,i)=>`<tr style="background:${i%2?'var(--card)':'transparent'}">${row.map(c=>`<td style="padding:7px 12px;border:1px solid var(--border)">${c}</td>`).join('')}</tr>`).join('')}</tbody></table><div style="font-size:12px;color:var(--muted);margin-top:8px">${body.length} rows × ${header.length} cols</div>`;};
+
+// ══════════════════════════════════════════════
+// 15. DOMAIN WHOIS
+// ══════════════════════════════════════════════
+PANELS['domain-whois']=()=>`
+<div class="form-row"><label>Domain Name</label><input type="text" id="dw-in" placeholder="example.com"></div>
+<div class="btn-row"><button class="btn btn-primary" onclick="lookupWhois()">Lookup Whois</button>
+<a href="https://lookup.icann.org/" target="_blank" class="btn btn-secondary">Open ICANN Whois ↗</a></div>
+<div id="dw-result"></div>`;
+window.lookupWhois=function(){const d=document.getElementById('dw-in').value.trim();if(!d)return;document.getElementById('dw-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Looking up...</div>';fetch(`https://api.domainsdb.info/v1/domains/search?domain=${d}&zone=com`).then(r=>r.json()).then(data=>{const res=data.domains?.[0];if(!res){document.getElementById('dw-result').innerHTML='<div class="result-box" style="margin-top:12px"><span class="status-err">No data found. Try ICANN ↗</span></div>';return;}document.getElementById('dw-result').innerHTML=`<div class="result-box" style="margin-top:12px"><table style="width:100%;font-size:13px;border-collapse:collapse">${[['Domain',res.domain],['Created',res.create_date||'N/A'],['Updated',res.update_date||'N/A'],['Country',res.country||'N/A']].map(([k,v])=>`<tr><td style="color:var(--muted);padding:5px 0;width:120px">${k}</td><td style="color:var(--text)">${v}</td></tr>`).join('')}</table></div>`;}).catch(()=>{document.getElementById('dw-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">API rate limited. Use ICANN lookup above.</div>';});};
+
+// ══════════════════════════════════════════════
+// 16. EMOJI PICKER
+// ══════════════════════════════════════════════
+const EMOJIS=['😀','😂','😍','🥰','😎','🤔','😭','😱','🎉','🔥','💯','❤️','🙏','👍','👏','✨','🎊','🌟','💪','🤝','😴','🤣','🥳','😤','😇','🤩','😏','😢','😡','🤯','🌍','🦁','🐶','🐱','🦊','🐼','🦄','🐉','🌈','⚡','🍕','🍔','🌮','🍜','🍣','🎮','💻','📱','🎵','🎸','⚽','🏀','🎯','🏆','🚀','✈️','🏖️','🌺','🌸','🍀','💎','🔑','💡','🔮','📚','🎓','🏠','🌙','☀️','🌊','🗻','🎭','🎨','📸','🎬','🧩','🎪','🦋','🌹','🍁','❄️','🎁','🧧','🪄','🎯'];
+PANELS['emoji']=()=>`
+<div class="form-row"><label>Search emoji</label><input type="text" id="em-s" placeholder="Search..." oninput="filterEmoji()"></div>
+<div class="emoji-grid" id="em-grid"></div>
+<div class="result-box" style="margin-top:12px;display:flex;align-items:center;gap:10px">
+  <span style="font-size:13px;color:var(--muted)">Last copied:</span>
+  <span id="em-copied" style="font-size:28px"></span>
+  <span id="em-name" style="font-size:13px;color:var(--green)"></span>
+</div>`;
+INITS['emoji']=()=>filterEmoji();
+window.filterEmoji=function(){const q=(document.getElementById('em-s')||{}).value||'';const list=q?EMOJIS.filter(e=>e.includes(q)):EMOJIS;document.getElementById('em-grid').innerHTML=list.map(e=>`<button class="emoji-btn" onclick="pickEmoji('${e}')">${e}</button>`).join('');};
+window.pickEmoji=function(e){navigator.clipboard.writeText(e);document.getElementById('em-copied').textContent=e;document.getElementById('em-name').textContent='Copied!';};
+
+// ══════════════════════════════════════════════
+// 17. FACEBOOK ID CARD
+// ══════════════════════════════════════════════
+function makeIdCard(canvasId,fields,theme){
+  const c=document.getElementById(canvasId);c.width=640;c.height=400;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle=theme.bg;ctx.fillRect(0,0,640,400);
+  ctx.fillStyle=theme.header;ctx.fillRect(0,0,640,70);
+  ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.fillText(theme.title,20,44);
+  ctx.fillStyle=theme.acc;ctx.font='bold 22px sans-serif';ctx.fillText(fields.name||'Full Name',20,110);
+  ctx.fillStyle='#aaa';ctx.font='15px sans-serif';
+  let y=145;
+  for(const[k,v] of Object.entries(fields)){if(k==='name')continue;ctx.fillStyle='#888';ctx.fillText(k+':',20,y);ctx.fillStyle='#ddd';ctx.fillText(v,140,y);y+=32;}
+  // Sample watermark
+  ctx.save();ctx.translate(320,200);ctx.rotate(-0.4);ctx.fillStyle='rgba(255,0,0,0.12)';ctx.font='bold 60px sans-serif';ctx.textAlign='center';ctx.fillText('SAMPLE',0,0);ctx.restore();
+}
+
+PANELS['fb-card']=()=>`
+<div class="warn-box">⚠️ For entertainment/educational purposes only. Do NOT use for deception.</div>
+<div class="form-grid">
+  <div><label>Full Name</label><input type="text" id="fb-name" value="Md. Rahim Uddin" oninput="makeFbCard()"></div>
+  <div><label>User ID</label><input type="text" id="fb-id" value="100073854219" oninput="makeFbCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Friends</label><input type="text" id="fb-fr" value="1,247" oninput="makeFbCard()"></div>
+  <div><label>Joined</label><input type="text" id="fb-joined" value="January 2019" oninput="makeFbCard()"></div>
+</div>
+<canvas id="fb-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"></canvas>
+<button class="btn btn-primary" onclick="makeAndDl('fb-canvas','fb-card.png')" style="margin-top:12px">⬇ Download Card</button>`;
+window.makeFbCard=function(){makeIdCard('fb-canvas',{name:document.getElementById('fb-name').value,'User ID':document.getElementById('fb-id').value,'Friends':document.getElementById('fb-fr').value,'Joined':document.getElementById('fb-joined').value},{bg:'#1a2540',header:'#1877f2',acc:'#4facfe',title:'f Facebook'});};
+INITS['fb-card']=()=>makeFbCard();
+
+PANELS['google-card']=()=>`
+<div class="warn-box">⚠️ For entertainment/educational purposes only.</div>
+<div class="form-grid">
+  <div><label>Full Name</label><input type="text" id="gc-name" value="Rahim Ahmed" oninput="makeGCard()"></div>
+  <div><label>Gmail</label><input type="text" id="gc-email" value="rahim@gmail.com" oninput="makeGCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Phone</label><input type="text" id="gc-phone" value="+880 17XX-XXXXXX" oninput="makeGCard()"></div>
+  <div><label>Google ID</label><input type="text" id="gc-gid" value="1029384756102" oninput="makeGCard()"></div>
+</div>
+<canvas id="gc-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"></canvas>
+<button class="btn btn-primary" onclick="makeAndDl('gc-canvas','google-card.png')" style="margin-top:12px">⬇ Download Card</button>`;
+window.makeGCard=function(){makeIdCard('gc-canvas',{name:document.getElementById('gc-name').value,'Email':document.getElementById('gc-email').value,'Phone':document.getElementById('gc-phone').value,'Google ID':document.getElementById('gc-gid').value},{bg:'#1a1a2e',header:'#ea4335',acc:'#34a853',title:'G Google Account'});};
+INITS['google-card']=()=>makeGCard();
+
+PANELS['fake-bd-old']=()=>`
+<div class="warn-box">⚠️ EDUCATIONAL / SAMPLE ONLY. Contains visible SAMPLE watermark. Do NOT use for fraud.</div>
+<div class="form-grid">
+  <div><label>Full Name (Bangla)</label><input type="text" id="nid-name" value="মোঃ রহিম উদ্দিন" oninput="makeNidCard()"></div>
+  <div><label>Full Name (English)</label><input type="text" id="nid-ename" value="Md. Rahim Uddin" oninput="makeNidCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Father's Name</label><input type="text" id="nid-father" value="মোঃ করিম মিয়া" oninput="makeNidCard()"></div>
+  <div><label>Date of Birth</label><input type="text" id="nid-dob" value="01 Jan 1990" oninput="makeNidCard()"></div>
+</div>
+<div class="form-row"><label>NID Number</label><input type="text" id="nid-num" value="1234 5678 9012 3456" oninput="makeNidCard()"></div>
+<canvas id="nid-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"></canvas>
+<button class="btn btn-primary" onclick="makeAndDl('nid-canvas','bd-nid-sample.png')" style="margin-top:12px">⬇ Download (SAMPLE)</button>`;
+window.makeNidCard=function(){
+  const c=document.getElementById('nid-canvas');c.width=640;c.height=380;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#1a3a5c';ctx.fillRect(0,0,640,380);
+  ctx.fillStyle='#2563ab';ctx.fillRect(0,0,640,55);
+  ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif';ctx.fillText('গণপ্রজাতন্ত্রী বাংলাদেশ সরকার',140,36);
+  ctx.fillStyle='#aed6f1';ctx.font='14px sans-serif';ctx.fillText('জাতীয় পরিচয়পত্র / National ID Card',165,50);
+  ctx.fillStyle='#f39c12';ctx.font='bold 13px sans-serif';ctx.fillText('নাম:',20,90);
+  ctx.fillStyle='#fff';ctx.font='16px sans-serif';ctx.fillText(document.getElementById('nid-name').value,80,90);
+  ctx.fillStyle='#aed6f1';ctx.font='14px sans-serif';ctx.fillText(document.getElementById('nid-ename').value,80,110);
+  ctx.fillStyle='#f39c12';ctx.font='bold 13px sans-serif';ctx.fillText('পিতা:',20,140);
+  ctx.fillStyle='#fff';ctx.font='14px sans-serif';ctx.fillText(document.getElementById('nid-father').value,80,140);
+  ctx.fillStyle='#f39c12';ctx.font='bold 13px sans-serif';ctx.fillText('জন্ম তারিখ:',20,170);
+  ctx.fillStyle='#fff';ctx.fillText(document.getElementById('nid-dob').value,120,170);
+  ctx.fillStyle='#bdc3c7';ctx.fillRect(20,195,200,120);ctx.fillStyle='#7f8c8d';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('Photo',120,265);ctx.textAlign='left';
+  ctx.fillStyle='#2980b9';ctx.fillRect(240,195,380,4);
+  ctx.fillStyle='#f39c12';ctx.font='bold 14px sans-serif';ctx.fillText('ID NO:',240,230);
+  ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.fillText(document.getElementById('nid-num').value,240,260);
+  ctx.save();ctx.translate(320,200);ctx.rotate(-0.3);ctx.fillStyle='rgba(255,50,50,0.18)';ctx.font='bold 72px sans-serif';ctx.textAlign='center';ctx.fillText('SAMPLE',0,0);ctx.restore();
+};
+INITS['fake-bd-old']=()=>makeNidCard();
+
+PANELS['fake-bd-smart']=()=>`
+<div class="warn-box">⚠️ EDUCATIONAL / SAMPLE ONLY. Visible SAMPLE watermark. Do NOT use for fraud.</div>
+<div class="form-grid">
+  <div><label>Name (Bangla)</label><input type="text" id="sm-name" value="মোঃ রহিম উদ্দিন" oninput="makeSmartCard()"></div>
+  <div><label>Name (English)</label><input type="text" id="sm-ename" value="Md. Rahim Uddin" oninput="makeSmartCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Father's Name</label><input type="text" id="sm-father" value="মোঃ করিম মিয়া" oninput="makeSmartCard()"></div>
+  <div><label>Mother's Name</label><input type="text" id="sm-mother" value="মোছাঃ রহিমা বেগম" oninput="makeSmartCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Date of Birth</label><input type="text" id="sm-dob" value="01 Jan 1990" oninput="makeSmartCard()"></div>
+  <div><label>NID Number</label><input type="text" id="sm-num" value="1234567890" oninput="makeSmartCard()"></div>
+</div>
+<canvas id="sm-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"></canvas>
+<button class="btn btn-primary" onclick="makeAndDl('sm-canvas','bd-smart-nid-sample.png')" style="margin-top:12px">⬇ Download (SAMPLE)</button>`;
+window.makeSmartCard=function(){
+  const c=document.getElementById('sm-canvas');c.width=640;c.height=400;
+  const ctx=c.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,640,400);g.addColorStop(0,'#1a1f3c');g.addColorStop(1,'#0d3b6e');
+  ctx.fillStyle=g;ctx.fillRect(0,0,640,400);
+  ctx.fillStyle='#c0392b';ctx.fillRect(0,0,640,50);ctx.fillStyle='#27ae60';ctx.fillRect(0,350,640,50);
+  ctx.fillStyle='#fff';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText('গণপ্রজাতন্ত্রী বাংলাদেশ সরকার',320,32);ctx.textAlign='left';
+  ctx.fillStyle='#bdc3c7';ctx.fillRect(20,70,150,180);ctx.fillStyle='#7f8c8d';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Photo',95,165);ctx.textAlign='left';
+  const rows=[['নাম:',document.getElementById('sm-name').value],['Name:',document.getElementById('sm-ename').value],['পিতা:',document.getElementById('sm-father').value],['মাতা:',document.getElementById('sm-mother').value],['জন্ম:',document.getElementById('sm-dob').value]];
+  let y=85;rows.forEach(([k,v])=>{ctx.fillStyle='#f39c12';ctx.font='bold 12px sans-serif';ctx.fillText(k,185,y);ctx.fillStyle='#ecf0f1';ctx.font='14px sans-serif';ctx.fillText(v,235,y);y+=35;});
+  ctx.fillStyle='#3498db';ctx.font='bold 11px sans-serif';ctx.fillText('NID:',20,275);ctx.fillStyle='#fff';ctx.font='bold 20px monospace';ctx.fillText(document.getElementById('sm-num').value,60,275);
+  ctx.save();ctx.translate(320,200);ctx.rotate(-0.3);ctx.fillStyle='rgba(255,50,50,0.15)';ctx.font='bold 72px sans-serif';ctx.textAlign='center';ctx.fillText('SAMPLE',0,0);ctx.restore();
+};
+INITS['fake-bd-smart']=()=>makeSmartCard();
+
+PANELS['fake-pak']=()=>`
+<div class="warn-box">⚠️ EDUCATIONAL / SAMPLE ONLY. Visible SAMPLE watermark. Do NOT use for fraud.</div>
+<div class="form-grid">
+  <div><label>Full Name</label><input type="text" id="pk-name" value="Muhammad Ali Khan" oninput="makePkCard()"></div>
+  <div><label>Father's Name</label><input type="text" id="pk-father" value="Abdul Khan" oninput="makePkCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Date of Birth</label><input type="text" id="pk-dob" value="01-01-1990" oninput="makePkCard()"></div>
+  <div><label>CNIC Number</label><input type="text" id="pk-cnic" value="12345-1234567-1" oninput="makePkCard()"></div>
+</div>
+<canvas id="pk-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"></canvas>
+<button class="btn btn-primary" onclick="makeAndDl('pk-canvas','pak-cnic-sample.png')" style="margin-top:12px">⬇ Download (SAMPLE)</button>`;
+window.makePkCard=function(){makeIdCard('pk-canvas',{name:document.getElementById('pk-name').value,'Father':document.getElementById('pk-father').value,'Date of Birth':document.getElementById('pk-dob').value,'CNIC':document.getElementById('pk-cnic').value},{bg:'#1a2a1a',header:'#01411c',acc:'#4ade80',title:'🇵🇰 NADRA - CNIC'});};
+INITS['fake-pak']=()=>makePkCard();
+window.makeAndDl=function(canvasId,filename){const a=document.createElement('a');a.download=filename;a.href=document.getElementById(canvasId).toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 18. GEMINI WATERMARK REMOVER
+// ══════════════════════════════════════════════
+PANELS['gemini-wm']=()=>`
+<div class="info-box">✂️ Crops the bottom portion of images to remove Nano Banana / Gemini watermarks</div>
+<div class="form-row"><label>Upload Image</label><input type="file" id="gw-file" accept="image/*" onchange="gwLoad()" style="color:var(--text)"></div>
+<div id="gw-controls" style="display:none">
+  <div class="form-row"><label>Crop from bottom: <strong id="gw-pl">40</strong>px</label>
+    <input type="range" min="10" max="150" value="40" id="gw-p" oninput="document.getElementById('gw-pl').textContent=this.value;gwRender()">
+  </div>
+  <canvas id="gw-canvas" style="max-width:100%;border-radius:12px;border:1px solid var(--border)"></canvas>
+  <div class="btn-row" style="margin-top:12px">
+    <button class="btn btn-green" onclick="gwDownload()">⬇ Download</button>
+  </div>
+</div>`;
+let gwSrcImg=null;
+window.gwLoad=function(){const img=new Image();img.onload=()=>{gwSrcImg=img;document.getElementById('gw-controls').style.display='block';gwRender();};img.src=URL.createObjectURL(document.getElementById('gw-file').files[0]);};
+window.gwRender=function(){if(!gwSrcImg)return;const crop=+document.getElementById('gw-p').value;const c=document.getElementById('gw-canvas');c.width=gwSrcImg.width;c.height=gwSrcImg.height-crop;c.getContext('2d').drawImage(gwSrcImg,0,0,gwSrcImg.width,gwSrcImg.height,0,0,gwSrcImg.width,gwSrcImg.height-crop);};
+window.gwDownload=function(){const a=document.createElement('a');a.download='no-watermark.png';a.href=document.getElementById('gw-canvas').toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 19. IMAGE BG REMOVER
+// ══════════════════════════════════════════════
+PANELS['bg-remover']=()=>`
+<div class="info-box">🖼️ Uses remove.bg API (free: 50 images/month). <a href="https://www.remove.bg/api" target="_blank" style="color:var(--blue)">Get free API key ↗</a></div>
+<div class="form-row"><label>remove.bg API Key</label><input type="text" id="rmbg-key" placeholder="Your API key"></div>
+<div class="form-row"><label>Select Image</label><input type="file" id="rmbg-file" accept="image/*" style="color:var(--text)"></div>
+<button class="btn btn-primary" onclick="removeBackground()">Remove Background</button>
+<div id="rmbg-result"></div>`;
+window.removeBackground=async function(){
+  const key=document.getElementById('rmbg-key').value;const file=document.getElementById('rmbg-file').files[0];
+  if(!key||!file){alert('Enter API key and select image');return;}
+  document.getElementById('rmbg-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Processing...</div>';
+  try{const fd=new FormData();fd.append('image_file',file);fd.append('size','auto');
+    const res=await fetch('https://api.remove.bg/v1.0/removebg',{method:'POST',headers:{'X-Api-Key':key},body:fd});
+    if(!res.ok)throw new Error((await res.json()).errors?.[0]?.title||'API Error');
+    const blob=await res.blob();const url=URL.createObjectURL(blob);
+    document.getElementById('rmbg-result').innerHTML=`<img src="${url}" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"><div class="btn-row" style="margin-top:12px"><a href="${url}" download="no-bg.png" class="btn btn-green" style="text-decoration:none">⬇ Download PNG</a></div>`;
+  }catch(e){document.getElementById('rmbg-result').innerHTML=`<div class="result-box" style="margin-top:12px"><span class="status-err">${e.message}</span></div>`;}
+};
+
+// ══════════════════════════════════════════════
+// 20. IMAGE COMPRESSOR
+// ══════════════════════════════════════════════
+PANELS['img-compress']=()=>`
+<div class="form-row"><label>Select Image</label><input type="file" id="ic-file" accept="image/*" onchange="icPreview()" style="color:var(--text)"></div>
+<div class="form-row"><label>Quality: <strong id="ic-ql">80</strong>%</label><input type="range" min="10" max="100" value="80" id="ic-q" oninput="document.getElementById('ic-ql').textContent=this.value"></div>
+<button class="btn btn-primary" onclick="compressImg()">Compress Image</button>
+<div id="ic-result"></div>`;
+window.icPreview=function(){const f=document.getElementById('ic-file').files[0];if(f)document.getElementById('ic-result').innerHTML=`<div class="result-box" style="margin-top:12px;color:var(--muted)">Original: ${(f.size/1024).toFixed(1)} KB</div>`;};
+window.compressImg=function(){const f=document.getElementById('ic-file').files[0];if(!f)return;const q=+document.getElementById('ic-q').value/100;const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);c.toBlob(b=>{const sz=(b.size/1024).toFixed(1);const orig=(f.size/1024).toFixed(1);const saved=Math.round((1-b.size/f.size)*100);const u=URL.createObjectURL(b);document.getElementById('ic-result').innerHTML=`<div class="result-grid" style="margin-top:12px"><div class="result-item"><div class="result-label">Original</div><div class="result-value" style="font-size:16px">${orig} KB</div></div><div class="result-item"><div class="result-label">Compressed</div><div class="result-value" style="font-size:16px;color:var(--green)">${sz} KB</div></div><div class="result-item"><div class="result-label">Saved</div><div class="result-value" style="font-size:16px;color:var(--teal)">${saved}%</div></div></div><a href="${u}" download="compressed.jpg" class="btn btn-green" style="margin-top:12px;text-decoration:none">⬇ Download</a>`;}, 'image/jpeg',q);};img.src=URL.createObjectURL(f);};
+
+// ══════════════════════════════════════════════
+// 21. IMAGE TEXT EXTRACTOR (OCR)
+// ══════════════════════════════════════════════
+PANELS['img-text']=()=>`
+<div class="info-box">📄 Uses Tesseract.js OCR engine. May take 10-20 seconds for first use (downloads AI model ~10MB).</div>
+<div class="form-row"><label>Select Image with Text</label><input type="file" id="it-file" accept="image/*" style="color:var(--text)"></div>
+<div class="form-row"><label>Language</label>
+  <select id="it-lang"><option value="eng">English</option><option value="ben">Bengali</option><option value="ara">Arabic</option></select>
+</div>
+<button class="btn btn-primary" id="it-btn" onclick="extractText()">Extract Text</button>
+<div id="it-status" style="margin-top:8px;font-size:13px;color:var(--muted)"></div>
+<div id="it-result"></div>`;
+window.extractText=function(){
+  const file=document.getElementById('it-file').files[0];
+  if(!file){alert('Select an image');return;}
+  const btn=document.getElementById('it-btn');btn.disabled=true;btn.textContent='Processing...';
+  document.getElementById('it-status').textContent='Loading OCR engine...';
+  loadScript('https://unpkg.com/tesseract.js@4/dist/tesseract.min.js',async()=>{
+    const lang=document.getElementById('it-lang').value;
+    try{
+      const worker=await Tesseract.createWorker(lang,1,{logger:m=>{if(m.status==='recognizing text') document.getElementById('it-status').textContent=`Recognizing: ${Math.round(m.progress*100)}%`;}});
+      const{data:{text}}=await worker.recognize(file);
+      await worker.terminate();
+      document.getElementById('it-result').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px"><span style="font-size:13px;color:var(--muted)">Extracted Text</span><button class="copy-btn" data-copy="${text.replace(/"/g,'&quot;')}" onclick="copyText(this)">Copy</button></div><textarea style="height:200px;margin-top:8px">${text}</textarea>`;
+      document.getElementById('it-status').textContent='✓ Done!';
+    }catch(e){document.getElementById('it-status').textContent='Error: '+e.message;}
+    btn.disabled=false;btn.textContent='Extract Text';
+  });
+};
+
+// ══════════════════════════════════════════════
+// 22. IMAGE TO ASCII ART
+// ══════════════════════════════════════════════
+PANELS['img-ascii']=()=>`
+<div class="form-row"><label>Select Image</label><input type="file" id="ia-file" accept="image/*" onchange="imgAscii()" style="color:var(--text)"></div>
+<div class="form-row"><label>Width (chars): <strong id="ia-wl">80</strong></label><input type="range" min="20" max="160" value="80" id="ia-w" oninput="document.getElementById('ia-wl').textContent=this.value;imgAscii()"></div>
+<div id="ia-result"></div>`;
+window.imgAscii=function(){const f=document.getElementById('ia-file').files[0];if(!f)return;const chars=' .,:;i1tfLCG08@';const img=new Image();img.onload=()=>{const w=+document.getElementById('ia-w').value;const h=Math.floor(w*(img.height/img.width)*0.55);const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);const d=ctx.getImageData(0,0,w,h).data;let ascii='';for(let y=0;y<h;y++){for(let x=0;x<w;x++){const i=(y*w+x)*4;const b=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114)/255;ascii+=chars[Math.floor(b*(chars.length-1))];}ascii+='\n';}document.getElementById('ia-result').innerHTML=`<pre style="font-size:7px;line-height:1.1;max-height:400px;overflow:auto">${ascii}</pre>`;};img.src=URL.createObjectURL(f);};
+
+// ══════════════════════════════════════════════
+// 23. IMAGE TO BASE64
+// ══════════════════════════════════════════════
+PANELS['img-base64']=()=>`
+<div class="form-row"><label>Select Image</label><input type="file" id="ib-file" accept="image/*" onchange="imgToBase64()" style="color:var(--text)"></div>
+<div id="ib-result"></div>`;
+window.imgToBase64=function(){const f=document.getElementById('ib-file').files[0];if(!f)return;const r=new FileReader();r.onload=e=>{const b64=e.target.result;document.getElementById('ib-result').innerHTML=`<img src="${b64}" style="max-width:200px;max-height:150px;border-radius:8px;margin-top:12px"><div class="result-box" style="margin-top:12px;max-height:120px;overflow:auto;font-size:11px;font-family:monospace;word-break:break-all">${b64.substring(0,300)}...</div><button class="btn btn-primary" style="margin-top:8px" onclick="navigator.clipboard.writeText(document.querySelector('#ib-result .result-box').nextSibling.textContent||'');this.textContent='Processing...';const r=new FileReader();r.onload=e=>navigator.clipboard.writeText(e.target.result).then(()=>{this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Full Base64',2000)});r.readAsDataURL(document.getElementById('ib-file').files[0])">Copy Full Base64</button>`;};r.readAsDataURL(f);};
+
+// ══════════════════════════════════════════════
+// 24. IMAGE TO EMOJI ART
+// ══════════════════════════════════════════════
+PANELS['img-emoji']=()=>`
+<div class="form-row"><label>Select Image</label><input type="file" id="ie-file" accept="image/*" onchange="imgEmojiArt()" style="color:var(--text)"></div>
+<div class="form-row"><label>Resolution: <strong id="ie-rl">30</strong> cols</label><input type="range" min="10" max="60" value="30" id="ie-r" oninput="document.getElementById('ie-rl').textContent=this.value;imgEmojiArt()"></div>
+<div id="ie-result"></div>`;
+const EBLOCKS=['⬛','🟫','🟥','🟧','🟨','🟩','🟦','🟪','⬜','🔲','🟤','🔴','🟠','🟡','🟢','🔵','🟣','⚫','⚪'];
+window.imgEmojiArt=function(){
+  const f=document.getElementById('ie-file').files[0];if(!f)return;
+  const cols=+document.getElementById('ie-r').value;
+  const img=new Image();img.onload=()=>{
+    const rows=Math.floor(cols*(img.height/img.width)*0.6);
+    const c=document.createElement('canvas');c.width=cols;c.height=rows;
+    const ctx=c.getContext('2d');ctx.drawImage(img,0,0,cols,rows);
+    const d=ctx.getImageData(0,0,cols,rows).data;
+    let out='';
+    for(let y=0;y<rows;y++){for(let x=0;x<cols;x++){const i=(y*cols+x)*4;const b=Math.round((d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114)/255*(EBLOCKS.length-1));out+=EBLOCKS[b];}out+='\n';}
+    document.getElementById('ie-result').innerHTML=`<div style="font-size:14px;line-height:1.2;margin-top:12px;overflow-x:auto;max-height:400px;overflow-y:auto;background:var(--card);padding:12px;border-radius:8px;font-family:monospace">${out}</div>`;
+  };img.src=URL.createObjectURL(f);
+};
+
+// ══════════════════════════════════════════════
+// 25. INTERNET SPEED
+// ══════════════════════════════════════════════
+PANELS['speed']=()=>`
+<div style="text-align:center;padding:24px 0">
+  <div style="font-size:80px;font-weight:800;color:var(--blue)" id="sp-num">—</div>
+  <div style="font-size:18px;color:var(--muted)">Mbps</div>
+  <div style="font-size:14px;color:var(--muted);margin-top:8px" id="sp-status">Click Start to begin</div>
+</div>
+<div style="display:flex;justify-content:center">
+  <button class="btn btn-primary" id="sp-btn" onclick="testSpeed()">▶ Start Test</button>
+</div>
+<div class="result-grid" style="margin-top:20px" id="sp-results"></div>`;
+window.testSpeed=async function(){
+  const btn=document.getElementById('sp-btn');btn.disabled=true;btn.textContent='Testing...';
+  document.getElementById('sp-num').textContent='...';document.getElementById('sp-status').textContent='Measuring...';
+  const sizes=[100000,500000,1000000];let tb=0,tt=0;
+  for(const s of sizes){try{const t0=performance.now();await fetch(`https://httpbin.org/bytes/${s}?t=${Date.now()}`);tt+=(performance.now()-t0)/1000;tb+=s;}catch(e){break;}}
+  const mbps=tb?((tb*8/tt)/1000000).toFixed(2):0;
+  document.getElementById('sp-num').textContent=mbps;
+  document.getElementById('sp-status').textContent=+mbps>50?'🟢 Excellent':+mbps>10?'🟡 Good':+mbps>2?'🟠 Fair':'🔴 Slow';
+  const t0=performance.now();await fetch('https://httpbin.org/get?t='+Date.now());const ping=(performance.now()-t0).toFixed(0);
+  document.getElementById('sp-results').innerHTML=[{l:'Download',v:mbps+' Mbps'},{l:'Ping',v:ping+' ms'},{l:'Data Used',v:(tb/1024/1024).toFixed(1)+' MB'}].map(i=>`<div class="result-item"><div class="result-label">${i.l}</div><div class="result-value" style="font-size:16px">${i.v}</div></div>`).join('');
+  btn.disabled=false;btn.textContent='▶ Test Again';
+};
+
+// ══════════════════════════════════════════════
+// 26. JSON FORMATTER
+// ══════════════════════════════════════════════
+PANELS['json-fmt']=()=>`
+<div class="form-row"><label>Paste JSON</label><textarea id="jf-in" placeholder='{"name":"BDTools","version":1}'></textarea></div>
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="fmtJson()">Format</button>
+  <button class="btn btn-secondary" onclick="minJson()">Minify</button>
+  <button class="btn btn-secondary" onclick="validateJson()">Validate</button>
+</div>
+<div id="jf-status" style="margin-top:8px"></div>
+<div id="jf-out" style="display:none"><div style="display:flex;justify-content:space-between;margin-top:12px"><span style="font-size:13px;color:var(--muted)">Output</span><button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('jf-pre').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div><pre id="jf-pre"></pre></div>`;
+window.fmtJson=function(){try{const j=JSON.parse(document.getElementById('jf-in').value);document.getElementById('jf-pre').textContent=JSON.stringify(j,null,2);document.getElementById('jf-out').style.display='block';document.getElementById('jf-status').innerHTML='<span class="status-ok">✓ Valid JSON</span>';}catch(e){document.getElementById('jf-status').innerHTML=`<span class="status-err">✗ ${e.message}</span>`;}};
+window.minJson=function(){try{const j=JSON.parse(document.getElementById('jf-in').value);document.getElementById('jf-pre').textContent=JSON.stringify(j);document.getElementById('jf-out').style.display='block';}catch(e){alert('Invalid JSON');}};
+window.validateJson=function(){try{JSON.parse(document.getElementById('jf-in').value);document.getElementById('jf-status').innerHTML='<span class="status-ok">✓ Valid JSON</span>';}catch(e){document.getElementById('jf-status').innerHTML=`<span class="status-err">✗ ${e.message}</span>`;}};
+
+// ══════════════════════════════════════════════
+// 27. JSON TREE
+// ══════════════════════════════════════════════
+PANELS['json-tree']=()=>`
+<div class="form-row"><label>Paste JSON</label><textarea id="jt-in" placeholder='{"name":"BDTools","tools":["QR","BMI"]}'></textarea></div>
+<button class="btn btn-primary" onclick="viewTree()">View Tree</button>
+<div id="jt-out"></div>`;
+function jsonToHtml(v,d=0){if(v===null)return'<span style="color:#f87171">null</span>';if(typeof v==='boolean')return`<span style="color:#fb923c">${v}</span>`;if(typeof v==='number')return`<span style="color:#86efac">${v}</span>`;if(typeof v==='string')return`<span style="color:#fde68a">"${v}"</span>`;if(Array.isArray(v)){if(!v.length)return'<span style="color:var(--muted)">[]</span>';return`<details open><summary style="cursor:pointer;color:#a78bfa">Array [${v.length}]</summary><div style="padding-left:18px;border-left:1px solid var(--border)">${v.map((i,k)=>`<div><span style="color:var(--muted)">${k}: </span>${jsonToHtml(i,d+1)}</div>`).join('')}</div></details>`;}const keys=Object.keys(v);if(!keys.length)return'<span style="color:var(--muted)">{}</span>';return`<details open><summary style="cursor:pointer;color:#60a5fa">Object {${keys.length}}</summary><div style="padding-left:18px;border-left:1px solid var(--border)">${keys.map(k=>`<div><span style="color:#c084fc">"${k}"</span>: ${jsonToHtml(v[k],d+1)}</div>`).join('')}</div></details>`;}
+window.viewTree=function(){try{const j=JSON.parse(document.getElementById('jt-in').value);document.getElementById('jt-out').innerHTML=`<div class="result-box" style="font-family:monospace;font-size:13px;line-height:1.8">${jsonToHtml(j)}</div>`;}catch(e){document.getElementById('jt-out').innerHTML=`<div class="result-box"><span class="status-err">✗ ${e.message}</span></div>`;}};
+
+// ══════════════════════════════════════════════
+// 28. LOREM IPSUM
+// ══════════════════════════════════════════════
+PANELS['lorem']=()=>`
+<div class="form-grid">
+  <div><label>Paragraphs</label><input type="number" id="li-p" value="3" min="1" max="20"></div>
+  <div><label>Language</label><select id="li-t"><option value="lorem">Lorem Ipsum (English)</option><option value="bangla">Bengali Dummy Text</option></select></div>
+</div>
+<button class="btn btn-primary" onclick="genLorem()">Generate</button>
+<div id="li-result"></div>`;
+const LOREM_EN='Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.';
+const LOREM_BN='বাংলাদেশ একটি সুন্দর দেশ যেখানে অনেক নদী ও সবুজ মাঠ রয়েছে। মানুষ খুবই বন্ধুত্বপূর্ণ এবং আতিথেয়তায় বিশ্বে বিখ্যাত। প্রকৃতির অপরূপ সৌন্দর্য এই দেশকে করেছে অনন্য। শস্য-শ্যামল এই ভূমিতে জন্মেছে অসংখ্য কবি, লেখক ও শিল্পী যারা বাংলা সাহিত্যকে সমৃদ্ধ করেছেন।';
+window.genLorem=function(){const p=+document.getElementById('li-p').value;const base=document.getElementById('li-t').value==='bangla'?LOREM_BN:LOREM_EN;const text=Array.from({length:p},()=>base).join('\n\n');document.getElementById('li-result').innerHTML=`<div style="display:flex;justify-content:space-between;margin-top:12px"><span style="font-size:13px;color:var(--muted)">${p} paragraph(s)</span><button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('li-text').value);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)">Copy</button></div><textarea id="li-text" style="height:200px;margin-top:8px">${text}</textarea>`;};
+
+// ══════════════════════════════════════════════
+// 29. MP3 TAG EDITOR
+// ══════════════════════════════════════════════
+PANELS['mp3-tag']=()=>`
+<div class="form-row"><label>Select MP3 File</label><input type="file" id="mt-file" accept=".mp3,audio/*" onchange="readMp3Tags()" style="color:var(--text)"></div>
+<div id="mt-result"></div>`;
+window.readMp3Tags=function(){
+  const file=document.getElementById('mt-file').files[0];if(!file)return;
+  document.getElementById('mt-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Reading tags...</div>';
+  loadScript('https://unpkg.com/jsmediatags@3.9.5/dist/jsmediatags.min.js',()=>{
+    window.jsmediatags.read(file,{onSuccess:function(tag){
+      const t=tag.tags;
+      const img=t.picture?`<img src="data:${t.picture.format};base64,${btoa(String.fromCharCode(...t.picture.data))}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">`:null;
+      const rows=[['Title',t.title||'Unknown'],['Artist',t.artist||'Unknown'],['Album',t.album||'Unknown'],['Year',t.year||'Unknown'],['Genre',t.genre||'Unknown'],['Track',t.track||'Unknown'],['Comment',t.comment?.text||'None']];
+      document.getElementById('mt-result').innerHTML=`<div class="result-box" style="margin-top:12px">${img?`<div style="margin-bottom:12px">${img}</div>`:''}<table style="width:100%;font-size:13px;border-collapse:collapse">${rows.map(([k,v])=>`<tr><td style="color:var(--muted);padding:6px 0;width:100px">${k}</td><td style="color:var(--text)">${v}</td></tr>`).join('')}</table></div>`;
+    },onError:function(e){document.getElementById('mt-result').innerHTML=`<div class="result-box" style="margin-top:12px"><span class="status-err">Could not read tags: ${e.type}</span></div>`;}});
+  });
+};
+
+// ══════════════════════════════════════════════
+// 30. ONLINE IMAGE EDITOR
+// ══════════════════════════════════════════════
+PANELS['img-editor']=()=>`
+<div class="form-row"><label>Upload Image</label><input type="file" id="oe-file" accept="image/*" onchange="oeLoad()" style="color:var(--text)"></div>
+<div id="oe-controls" style="display:none">
+  <div class="form-grid">
+    <div><label>Brightness: <span id="oe-bl">100</span>%</label><input type="range" min="0" max="200" value="100" id="oe-b" oninput="document.getElementById('oe-bl').textContent=this.value;oeRender()"></div>
+    <div><label>Contrast: <span id="oe-cl">100</span>%</label><input type="range" min="0" max="300" value="100" id="oe-c" oninput="document.getElementById('oe-cl').textContent=this.value;oeRender()"></div>
+  </div>
+  <div class="form-grid">
+    <div><label>Saturation: <span id="oe-sl">100</span>%</label><input type="range" min="0" max="300" value="100" id="oe-s" oninput="document.getElementById('oe-sl').textContent=this.value;oeRender()"></div>
+    <div><label>Blur: <span id="oe-bll">0</span>px</label><input type="range" min="0" max="20" value="0" id="oe-bl2" oninput="document.getElementById('oe-bll').textContent=this.value;oeRender()"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="oeRotate(-90)">↺ Rotate Left</button>
+    <button class="btn btn-secondary" onclick="oeRotate(90)">↻ Rotate Right</button>
+    <button class="btn btn-secondary" onclick="oeFlip('h')">⟺ Flip H</button>
+    <button class="btn btn-secondary" onclick="oeFlip('v')">⟺ Flip V</button>
+    <button class="btn btn-secondary" onclick="oeGray()">⬛ Grayscale</button>
+    <button class="btn btn-secondary" onclick="oeReset()">↺ Reset</button>
+  </div>
+  <canvas id="editor-canvas" style="max-width:100%;border-radius:12px;border:1px solid var(--border);margin-top:12px;display:block"></canvas>
+  <button class="btn btn-green" onclick="oeDl()" style="margin-top:12px">⬇ Download</button>
+</div>`;
+let oeSrc=null,oeRot=0,oeFlipH=false,oeFlipV=false,oeIsGray=false;
+window.oeLoad=function(){const img=new Image();img.onload=()=>{oeSrc=img;oeRot=0;oeFlipH=oeFlipV=oeIsGray=false;document.getElementById('oe-controls').style.display='block';oeRender();};img.src=URL.createObjectURL(document.getElementById('oe-file').files[0]);};
+window.oeRotate=function(deg){oeRot=(oeRot+deg+360)%360;oeRender();};
+window.oeFlip=function(dir){if(dir==='h')oeFlipH=!oeFlipH;else oeFlipV=!oeFlipV;oeRender();};
+window.oeGray=function(){oeIsGray=!oeIsGray;oeRender();};
+window.oeReset=function(){oeRot=0;oeFlipH=oeFlipV=oeIsGray=false;['oe-b','oe-c','oe-s','oe-bl2'].forEach(id=>{document.getElementById(id).value=id==='oe-bl2'?0:100;});['oe-bl','oe-cl','oe-sl'].forEach(id=>{document.getElementById(id).textContent=100;});document.getElementById('oe-bll').textContent=0;oeRender();};
+window.oeRender=function(){
+  if(!oeSrc)return;
+  const b=+document.getElementById('oe-b').value/100,ct=+document.getElementById('oe-c').value/100,sat=+document.getElementById('oe-s').value/100,bl=+document.getElementById('oe-bl2').value;
+  const rotated=oeRot===90||oeRot===270;
+  const c=document.getElementById('editor-canvas');c.width=rotated?oeSrc.height:oeSrc.width;c.height=rotated?oeSrc.width:oeSrc.height;
+  const ctx=c.getContext('2d');
+  ctx.save();ctx.translate(c.width/2,c.height/2);ctx.rotate(oeRot*Math.PI/180);ctx.scale(oeFlipH?-1:1,oeFlipV?-1:1);ctx.drawImage(oeSrc,-oeSrc.width/2,-oeSrc.height/2);ctx.restore();
+  ctx.filter=`brightness(${b}) contrast(${ct}) saturate(${sat})${bl>0?` blur(${bl}px)`:''}${oeIsGray?' grayscale(1)':''}`;
+  ctx.drawImage(c,0,0);ctx.filter='none';
+};
+window.oeDl=function(){const a=document.createElement('a');a.download='edited.png';a.href=document.getElementById('editor-canvas').toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 31. PASSWORD GENERATOR
+// ══════════════════════════════════════════════
+PANELS['pass-gen']=()=>`
+<div class="form-row"><label>Length: <strong id="pg-len-lbl">16</strong></label><input type="range" min="6" max="64" value="16" id="pg-len" oninput="document.getElementById('pg-len-lbl').textContent=this.value"></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+  <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="pg-up" checked> Uppercase (A-Z)</label>
+  <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="pg-lo" checked> Lowercase (a-z)</label>
+  <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="pg-nu" checked> Numbers (0-9)</label>
+  <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="pg-sy" checked> Symbols (!@#$)</label>
+</div>
+<div class="btn-row"><button class="btn btn-primary" onclick="genPass()">Generate</button><button class="btn btn-secondary" onclick="genPass(5)">Generate 5</button></div>
+<div id="pg-result"></div>`;
+window.genPass=function(count=1){const len=+document.getElementById('pg-len').value;let chars='';if(document.getElementById('pg-up').checked)chars+='ABCDEFGHIJKLMNOPQRSTUVWXYZ';if(document.getElementById('pg-lo').checked)chars+='abcdefghijklmnopqrstuvwxyz';if(document.getElementById('pg-nu').checked)chars+='0123456789';if(document.getElementById('pg-sy').checked)chars+='!@#$%^&*()_+-=[]{}|;:,.<>?';if(!chars)return;const passes=Array.from({length:count},()=>Array.from({length:len},()=>chars[Math.floor(Math.random()*chars.length)]).join(''));document.getElementById('pg-result').innerHTML=passes.map(p=>`<div class="result-box" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-family:monospace"><span>${p}</span><button class="copy-btn" data-copy="${p}" onclick="copyText(this)">Copy</button></div>`).join('');};
+
+// ══════════════════════════════════════════════
+// 32. PHOTO FILTER
+// ══════════════════════════════════════════════
+const FILTERS={Original:'',Grayscale:'grayscale(100%)','Sepia (Warm)':'sepia(80%)','Vintage':'sepia(40%) contrast(110%) brightness(90%)',Vivid:'saturate(200%) contrast(110%)',Cold:'hue-rotate(200deg) saturate(120%)','Dramatic B&W':'grayscale(100%) contrast(200%) brightness(80%)',Fade:'brightness(110%) contrast(80%) saturate(70%)',Retro:'sepia(50%) hue-rotate(20deg) contrast(90%)',Neon:'hue-rotate(120deg) saturate(300%) contrast(120%)'};
+PANELS['photo-filter']=()=>`
+<div class="form-row"><label>Upload Photo</label><input type="file" id="pf-file" accept="image/*" onchange="pfLoad()" style="color:var(--text)"></div>
+<div id="pf-controls" style="display:none">
+  <div class="filter-grid" id="pf-thumbs"></div>
+  <canvas id="filter-canvas" style="max-width:100%;border-radius:12px;border:1px solid var(--border);margin-bottom:12px;display:block"></canvas>
+  <button class="btn btn-green" onclick="pfDl()">⬇ Download Filtered</button>
+</div>`;
+let pfImg=null,pfActiveFilter='Original';
+window.pfLoad=function(){const img=new Image();img.onload=()=>{pfImg=img;document.getElementById('pf-controls').style.display='block';pfRenderThumbs();pfApply('Original');};img.src=URL.createObjectURL(document.getElementById('pf-file').files[0]);};
+function pfRenderThumbs(){document.getElementById('pf-thumbs').innerHTML=Object.keys(FILTERS).map(f=>`<div class="filter-item"><div style="width:70px;height:52px;border-radius:8px;cursor:pointer;border:2px solid ${f===pfActiveFilter?'var(--blue)':'transparent'};overflow:hidden;transition:border 0.15s" onclick="pfApply('${f}')" id="pf-th-${f.replace(/[^a-z]/gi,'')}" title="${f}"><canvas id="pf-tc-${f.replace(/[^a-z]/gi,'')}" width="70" height="52"></canvas></div><div style="font-size:10px;margin-top:3px;width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f}</div></div>`).join('');}
+window.pfApply=function(filterName){
+  pfActiveFilter=filterName;
+  const fc=document.getElementById('filter-canvas');fc.width=pfImg.width;fc.height=pfImg.height;
+  const ctx=fc.getContext('2d');ctx.filter=FILTERS[filterName]||'';ctx.drawImage(pfImg,0,0);
+  Object.keys(FILTERS).forEach(f=>{
+    const id=f.replace(/[^a-z]/gi,'');const tc=document.getElementById('pf-tc-'+id);if(!tc)return;
+    const ctx2=tc.getContext('2d');ctx2.filter=FILTERS[f]||'';ctx2.drawImage(pfImg,0,0,70,52);
+    const wrapper=document.getElementById('pf-th-'+id);if(wrapper)wrapper.style.borderColor=f===filterName?'var(--blue)':'transparent';
+  });
+};
+INITS['photo-filter']=()=>{};
+window.pfDl=function(){const a=document.createElement('a');a.download='filtered.png';a.href=document.getElementById('filter-canvas').toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 33. QR MAKER
+// ══════════════════════════════════════════════
+PANELS['qr-make']=()=>`
+<div class="form-row"><label>Text or URL</label><input type="text" id="qr-text" placeholder="https://bdtools.example.com or any text" value="https://bdtools.example.com"></div>
+<div class="form-grid">
+  <div><label>Size</label><select id="qr-size"><option value="128">Small</option><option value="256" selected>Medium</option><option value="512">Large</option></select></div>
+  <div><label>Error Correction</label><select id="qr-ec"><option value="L">Low</option><option value="M" selected>Medium</option><option value="H">High</option></select></div>
+</div>
+<div class="form-grid">
+  <div><label>Dark Color</label><input type="color" id="qr-dark" value="#000000"></div>
+  <div><label>Light Color</label><input type="color" id="qr-light" value="#ffffff"></div>
+</div>
+<div class="btn-row"><button class="btn btn-primary" onclick="makeQR()">Generate QR</button><button class="btn btn-secondary" onclick="downloadQR()">⬇ Download PNG</button></div>
+<div id="qr-output" style="display:none;justify-content:center;padding:20px;background:#fff;border-radius:12px;margin-top:16px"></div>`;
+window.makeQR=function(){const t=document.getElementById('qr-text').value;if(!t)return;const s=+document.getElementById('qr-size').value;const o=document.getElementById('qr-output');o.innerHTML='';o.style.display='flex';loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',()=>new QRCode(o,{text:t,width:s,height:s,colorDark:document.getElementById('qr-dark').value,colorLight:document.getElementById('qr-light').value,correctLevel:QRCode.CorrectLevel[document.getElementById('qr-ec').value]}));};
+window.downloadQR=function(){const c=document.querySelector('#qr-output canvas');if(!c){alert('Generate QR first');return;}const a=document.createElement('a');a.download='qrcode.png';a.href=c.toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 34. QR SCANNER
+// ══════════════════════════════════════════════
+PANELS['qr-scan']=()=>`
+<div class="form-row"><label>Upload QR Code Image</label><input type="file" id="qs-file" accept="image/*" onchange="scanQR()" style="color:var(--text)"></div>
+<div id="qs-result"></div>`;
+window.scanQR=function(){
+  const file=document.getElementById('qs-file').files[0];if(!file)return;
+  document.getElementById('qs-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Scanning...</div>';
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js',()=>{
+    const img=new Image();img.onload=()=>{
+      const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+      const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+      const id=ctx.getImageData(0,0,c.width,c.height);
+      const code=jsQR(id.data,id.width,id.height);
+      if(code){
+        const isUrl=code.data.startsWith('http');
+        document.getElementById('qs-result').innerHTML=`<div class="result-box" style="margin-top:12px"><div style="color:var(--green);font-weight:600;margin-bottom:8px">✓ QR Code Detected!</div><div style="word-break:break-all;font-size:15px">${isUrl?`<a href="${code.data}" target="_blank" style="color:var(--blue)">${code.data}</a>`:code.data}</div><button class="copy-btn" data-copy="${code.data}" onclick="copyText(this)" style="margin-top:8px">Copy</button></div>`;
+      }else{document.getElementById('qs-result').innerHTML='<div class="result-box" style="margin-top:12px"><span class="status-err">No QR code found. Try a clearer image.</span></div>';}
+    };img.src=URL.createObjectURL(file);
+  });
+};
+
+// ══════════════════════════════════════════════
+// 35. REGEX TESTER
+// ══════════════════════════════════════════════
+PANELS['regex']=()=>`
+<div class="form-row"><label>Regular Expression</label><input type="text" id="rx-pat" placeholder="\\d+" value="\\d+"></div>
+<div class="form-grid">
+  <div><label>Flags</label><input type="text" id="rx-flags" value="gi" placeholder="g, i, m..."></div>
+  <div style="display:flex;align-items:flex-end;padding-bottom:2px"><button class="btn btn-primary" onclick="testRegex()">Test</button></div>
+</div>
+<div class="form-row"><label>Test String</label><textarea id="rx-str">Hello World 123, testing regex 456!</textarea></div>
+<div id="rx-result"></div>`;
+window.testRegex=function(){try{const pat=document.getElementById('rx-pat').value,flags=document.getElementById('rx-flags').value,str=document.getElementById('rx-str').value;const re=new RegExp(pat,flags);const matches=[...str.matchAll(new RegExp(pat,flags.includes('g')?flags:flags+'g'))];const highlighted=str.replace(re,m=>`<mark style="background:rgba(59,130,246,0.3);color:#93c5fd;border-radius:3px">${m}</mark>`);document.getElementById('rx-result').innerHTML=`<div class="result-box" style="margin-top:12px"><div style="font-size:13px;color:var(--muted);margin-bottom:8px">${matches.length} match(es)</div><div style="font-family:monospace;font-size:14px;line-height:1.8">${highlighted}</div>${matches.length?`<hr class="divider">${matches.map((m,i)=>`<div style="font-size:13px;font-family:monospace;color:var(--teal)">${i+1}. "${m[0]}" at index ${m.index}</div>`).join('')}`:''}</div>`;}catch(e){document.getElementById('rx-result').innerHTML=`<div class="result-box"><span class="status-err">Regex Error: ${e.message}</span></div>`;}};
+
+// ══════════════════════════════════════════════
+// 36. SECURITY HEADERS CHECKER
+// ══════════════════════════════════════════════
+PANELS['sec-headers']=()=>`
+<div class="warn-box">⚠️ Browser CORS blocks direct header checks. This tool explains what headers to look for + redirects to a live checker.</div>
+<div class="form-row"><label>Website URL</label><input type="text" id="sh-url" placeholder="https://example.com" value="https://example.com"></div>
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="checkSecHeaders()">Check Headers</button>
+  <button class="btn btn-secondary" onclick="window.open('https://securityheaders.com/?q='+encodeURIComponent(document.getElementById('sh-url').value)+'&followRedirects=on','_blank')">Open SecurityHeaders.com ↗</button>
+</div>
+<div id="sh-result"></div>`;
+window.checkSecHeaders=function(){
+  const headers=[['Content-Security-Policy','Prevents XSS attacks by controlling allowed content sources'],['X-Frame-Options','Prevents clickjacking by blocking iframe embedding'],['X-Content-Type-Options','Stops MIME-type sniffing'],['Strict-Transport-Security','Forces HTTPS connections (HSTS)'],['Referrer-Policy','Controls how much referrer info is included with requests'],['Permissions-Policy','Controls browser features like camera/mic access'],['X-XSS-Protection','Legacy XSS filter for older browsers']];
+  document.getElementById('sh-result').innerHTML=`
+    <div class="result-box" style="margin-top:12px">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Security headers your site should implement:</div>
+      ${headers.map(([h,d])=>`<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber);flex-shrink:0;margin-top:5px"></div><div><div style="font-size:13px;font-weight:600;color:#93c5fd;font-family:monospace">${h}</div><div style="font-size:12px;color:var(--muted)">${d}</div></div></div>`).join('')}
+      <a href="https://securityheaders.com/?q=${encodeURIComponent(document.getElementById('sh-url').value)}&followRedirects=on" target="_blank" class="btn btn-primary" style="text-decoration:none;margin-top:8px">Check ${document.getElementById('sh-url').value} ↗</a>
+    </div>`;
+};
+
+// ══════════════════════════════════════════════
+// 37. TEXT LOGO
+// ══════════════════════════════════════════════
+PANELS['text-logo']=()=>`
+<div class="form-row"><label>Logo Text</label><input type="text" id="tl-text" value="BDTools" oninput="makeLogo()"></div>
+<div class="form-grid">
+  <div><label>Font Size: <span id="tl-fsl">60</span>px</label><input type="range" min="20" max="120" value="60" id="tl-fs" oninput="document.getElementById('tl-fsl').textContent=this.value;makeLogo()"></div>
+  <div><label>Text Color</label><input type="color" id="tl-tc" value="#3b82f6" oninput="makeLogo()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Background</label><input type="color" id="tl-bg" value="#0a0f1a" oninput="makeLogo()"></div>
+  <div><label>Style</label><select id="tl-st" onchange="makeLogo()"><option>normal</option><option>bold</option><option value="italic">Italic</option><option value="shadow">Shadow</option><option value="outline">Outline</option></select></div>
+</div>
+<button class="btn btn-primary" onclick="dlLogo()">⬇ Download Logo</button>
+<canvas id="tl-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border);display:block"></canvas>`;
+INITS['text-logo']=()=>makeLogo();
+window.makeLogo=function(){const text=document.getElementById('tl-text').value||'Logo';const fs=+document.getElementById('tl-fs').value;const tc=document.getElementById('tl-tc').value;const bg=document.getElementById('tl-bg').value;const st=document.getElementById('tl-st').value;const c=document.getElementById('tl-canvas');c.width=Math.max(text.length*fs*0.65,200)+80;c.height=fs*2.4;const ctx=c.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,c.width,c.height);if(st==='shadow'){ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=12;ctx.shadowOffsetX=4;ctx.shadowOffsetY=4;}ctx.font=`${st==='bold'?'bold ':st==='italic'?'italic ':''}${fs}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';if(st==='outline'){ctx.strokeStyle=tc;ctx.lineWidth=3;ctx.strokeText(text,c.width/2,c.height/2);}ctx.fillStyle=tc;ctx.fillText(text,c.width/2,c.height/2);ctx.shadowBlur=0;};
+window.dlLogo=function(){makeLogo();const a=document.createElement('a');a.download='logo.png';a.href=document.getElementById('tl-canvas').toDataURL();a.click();};
+
+// ══════════════════════════════════════════════
+// 38. STUDENT ID CARD
+// ══════════════════════════════════════════════
+PANELS['student-card']=()=>`
+<div class="form-grid">
+  <div><label>Student Name</label><input type="text" id="sc-name" value="Md. Rahim Uddin" oninput="makeStudentCard()"></div>
+  <div><label>Student ID</label><input type="text" id="sc-id" value="STU-2024-0042" oninput="makeStudentCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Class / Dept.</label><input type="text" id="sc-class" value="Class 10 / Science" oninput="makeStudentCard()"></div>
+  <div><label>Session</label><input type="text" id="sc-session" value="2023-24" oninput="makeStudentCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Institution</label><input type="text" id="sc-school" value="Dhaka Model School & College" oninput="makeStudentCard()"></div>
+  <div><label>Blood Group</label><input type="text" id="sc-blood" value="B+" oninput="makeStudentCard()"></div>
+</div>
+<canvas id="sc-canvas" style="max-width:100%;border-radius:12px;margin-top:12px;border:1px solid var(--border)"></canvas>
+<button class="btn btn-primary" onclick="makeAndDl('sc-canvas','student-id.png')" style="margin-top:12px">⬇ Download Card</button>`;
+window.makeStudentCard=function(){
+  const c=document.getElementById('sc-canvas');c.width=640;c.height=380;const ctx=c.getContext('2d');
+  const g=ctx.createLinearGradient(0,0,640,0);g.addColorStop(0,'#1e3a5f');g.addColorStop(1,'#0a1628');
+  ctx.fillStyle=g;ctx.fillRect(0,0,640,380);
+  ctx.fillStyle='#1877f2';ctx.fillRect(0,0,640,60);
+  ctx.fillStyle='#fff';ctx.font='bold 18px sans-serif';ctx.textAlign='center';ctx.fillText(document.getElementById('sc-school').value,320,38);ctx.textAlign='left';
+  ctx.fillStyle='#bdc3c7';ctx.fillRect(20,80,130,160);ctx.fillStyle='#7f8c8d';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('Photo',85,165);ctx.textAlign='left';
+  ctx.fillStyle='#3498db';ctx.font='bold 12px sans-serif';ctx.fillText('STUDENT ID CARD',170,90);
+  const fields=[['Name:',document.getElementById('sc-name').value],['Student ID:',document.getElementById('sc-id').value],['Class/Dept:',document.getElementById('sc-class').value],['Session:',document.getElementById('sc-session').value],['Blood:',document.getElementById('sc-blood').value]];
+  let y=115;fields.forEach(([k,v])=>{ctx.fillStyle='#7f8c8d';ctx.font='bold 12px sans-serif';ctx.fillText(k,170,y);ctx.fillStyle='#ecf0f1';ctx.font='14px sans-serif';ctx.fillText(v,250,y);y+=28;});
+  ctx.fillStyle='#2c3e50';ctx.fillRect(0,340,640,40);ctx.fillStyle='#7f8c8d';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText('If found, please return to the institution. This card is non-transferable.',320,365);ctx.textAlign='left';
+};
+INITS['student-card']=()=>makeStudentCard();
+
+// ══════════════════════════════════════════════
+// 39. TEXT ANALYZER
+// ══════════════════════════════════════════════
+PANELS['text-analyze']=()=>`
+<div class="form-row"><label>Enter your text</label><textarea id="ta-in" placeholder="Type or paste your text here..." oninput="analyzeText()"></textarea></div>
+<div id="ta-result" class="result-grid"></div>`;
+window.analyzeText=function(){const t=document.getElementById('ta-in').value;const words=t.trim()?t.trim().split(/\s+/).length:0;const sentences=t.trim()?t.split(/[.!?]+/).filter(s=>s.trim()).length:0;const paragraphs=t.trim()?t.split(/\n\s*\n/).filter(p=>p.trim()).length:0;document.getElementById('ta-result').innerHTML=[{l:'Characters',v:t.length},{l:'No-Space Chars',v:t.replace(/\s/g,'').length},{l:'Words',v:words},{l:'Sentences',v:sentences},{l:'Paragraphs',v:paragraphs},{l:'Read Time',v:Math.ceil(words/200)+'min'}].map(i=>`<div class="result-item"><div class="result-label">${i.l}</div><div class="result-value" style="font-size:18px">${i.v}</div></div>`).join('');};
+
+// ══════════════════════════════════════════════
+// 40. TEXT DIFF
+// ══════════════════════════════════════════════
+PANELS['text-diff']=()=>`
+<div class="form-grid">
+  <div><label>Original Text</label><textarea id="td-a" placeholder="Original..."></textarea></div>
+  <div><label>Modified Text</label><textarea id="td-b" placeholder="Modified..."></textarea></div>
+</div>
+<button class="btn btn-primary" onclick="diffTexts()">Compare</button>
+<div id="td-result"></div>`;
+window.diffTexts=function(){const a=document.getElementById('td-a').value.split('\n');const b=document.getElementById('td-b').value.split('\n');const max=Math.max(a.length,b.length);let html='';for(let i=0;i<max;i++){if(a[i]===b[i])html+=`<div class="diff-line diff-same">  ${a[i]||''}</div>`;else{if(a[i]!==undefined)html+=`<div class="diff-line diff-del">- ${a[i]}</div>`;if(b[i]!==undefined)html+=`<div class="diff-line diff-add">+ ${b[i]}</div>`;}}document.getElementById('td-result').innerHTML=`<div style="margin-top:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:monospace;max-height:400px;overflow-y:auto">${html}</div>`;};
+
+// ══════════════════════════════════════════════
+// 41. TEXT TO ASCII ART
+// ══════════════════════════════════════════════
+PANELS['text-ascii']=()=>`
+<div class="form-row"><label>Enter Text</label><input type="text" id="taa-in" placeholder="BDTOOLS" value="BDTOOLS" maxlength="12"></div>
+<button class="btn btn-primary" onclick="textAscii()">Generate ASCII Art</button>
+<div id="taa-result"></div>`;
+const BLOCK={'A':['▄▄▄',' █ █','█████','█   █','█   █'],'B':['████ ','█   █','████ ','█   █','████ '],'C':[' ████','█    ','█    ','█    ',' ████'],'D':['████ ','█   █','█   █','█   █','████ '],'E':['█████','█    ','████ ','█    ','█████'],'F':['█████','█    ','████ ','█    ','█    '],'G':[' ████','█    ','█  ██','█   █',' ████'],'H':['█   █','█   █','█████','█   █','█   █'],'I':['█████','  █  ','  █  ','  █  ','█████'],'J':['  ███','   █ ','   █ ','█  █ ',' ██  '],'K':['█   █','█  █ ','███  ','█  █ ','█   █'],'L':['█    ','█    ','█    ','█    ','█████'],'M':['█   █','██ ██','█ █ █','█   █','█   █'],'N':['█   █','██  █','█ █ █','█  ██','█   █'],'O':[' ███ ','█   █','█   █','█   █',' ███ '],'P':['████ ','█   █','████ ','█    ','█    '],'Q':[' ███ ','█   █','█ █ █','█  ██',' ████'],'R':['████ ','█   █','████ ','█  █ ','█   █'],'S':[' ████','█    ',' ███ ','    █','████ '],'T':['█████','  █  ','  █  ','  █  ','  █  '],'U':['█   █','█   █','█   █','█   █',' ███ '],'V':['█   █','█   █','█   █',' █ █ ','  █  '],'W':['█   █','█   █','█ █ █','██ ██','█   █'],'X':['█   █',' █ █ ','  █  ',' █ █ ','█   █'],'Y':['█   █',' █ █ ','  █  ','  █  ','  █  '],'Z':['█████','   █ ','  █  ',' █   ','█████'],' ':['     ','     ','     ','     ','     '],'0':[' ███ ','█  ██','█ █ █','██  █',' ███ '],'1':['  █  ',' ██  ','  █  ','  █  ','█████'],'2':[' ███ ','█   █','   █ ','  █  ','█████'],'3':['████ ','    █',' ███ ','    █','████ '],'4':['   █ ','  ██ ',' █ █ ','█████','   █ '],'5':['█████','█    ','████ ','    █','████ '],'6':[' ███ ','█    ','████ ','█   █',' ███ '],'7':['█████','   █ ','  █  ',' █   ','█    '],'8':[' ███ ','█   █',' ███ ','█   █',' ███ '],'9':[' ███ ','█   █',' ████','    █',' ███ ']};
+window.textAscii=function(){const t=document.getElementById('taa-in').value.toUpperCase();let rows=['','','','',''];for(const ch of t){const b=BLOCK[ch]||BLOCK[' '];for(let r=0;r<5;r++)rows[r]+=(b[r]||'     ')+'  ';}document.getElementById('taa-result').innerHTML=`<pre style="margin-top:12px;color:var(--blue);font-size:13px;line-height:1.4;overflow-x:auto">${rows.join('\n')}</pre>`;};
+
+// ══════════════════════════════════════════════
+// 42. TYPING TEST
+// ══════════════════════════════════════════════
+const TYPING_TEXTS=['The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs.','Bangladesh is a beautiful country with many rivers and green fields. Its people are known for their hospitality.','Technology changes the world every day. Learning to type fast is a skill that can boost your productivity significantly.','Practice makes perfect. The more you type, the faster and more accurate your typing will become over time.'];
+let typingState={text:'',typed:'',started:false,startTime:null,timer:null};
+PANELS['typing']=()=>`
+<div id="ty-display" style="font-size:18px;line-height:2;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;letter-spacing:0.3px;min-height:80px"></div>
+<input type="text" id="ty-input" placeholder="Start typing here..." oninput="typingInput()" style="margin-top:12px;font-size:16px">
+<div class="result-grid" style="margin-top:12px">
+  <div class="result-item"><div class="result-label">WPM</div><div class="result-value" id="ty-wpm">0</div></div>
+  <div class="result-item"><div class="result-label">Accuracy</div><div class="result-value" id="ty-acc">100%</div></div>
+  <div class="result-item"><div class="result-label">Time</div><div class="result-value" id="ty-time">0s</div></div>
+  <div class="result-item"><div class="result-label">Characters</div><div class="result-value" id="ty-chars">0</div></div>
+</div>
+<button class="btn btn-secondary" onclick="resetTyping()" style="margin-top:12px">↺ New Test</button>`;
+INITS['typing']=()=>resetTyping();
+window.resetTyping=function(){clearInterval(typingState.timer);const t=TYPING_TEXTS[Math.floor(Math.random()*TYPING_TEXTS.length)];typingState={text:t,typed:'',started:false,startTime:null,timer:null};const inp=document.getElementById('ty-input');if(inp){inp.value='';inp.disabled=false;}document.getElementById('ty-wpm').textContent='0';document.getElementById('ty-acc').textContent='100%';document.getElementById('ty-time').textContent='0s';document.getElementById('ty-chars').textContent='0';renderTyping();document.getElementById('ty-input').focus();};
+function renderTyping(){const t=typingState.text,typed=typingState.typed;let html='';for(let i=0;i<t.length;i++){let cls='';if(i<typed.length)cls=typed[i]===t[i]?'style="color:var(--green)"':'style="color:var(--red);text-decoration:underline"';else if(i===typed.length)cls='style="background:var(--blue);border-radius:2px"';html+=`<span ${cls}>${t[i]}</span>`;}document.getElementById('ty-display').innerHTML=html;}
+window.typingInput=function(){const inp=document.getElementById('ty-input');typingState.typed=inp.value;if(!typingState.started&&inp.value.length>0){typingState.started=true;typingState.startTime=Date.now();typingState.timer=setInterval(()=>{const s=Math.floor((Date.now()-typingState.startTime)/1000);document.getElementById('ty-time').textContent=s+'s';const words=typingState.typed.trim().split(/\s+/).length;document.getElementById('ty-wpm').textContent=Math.round(words/(s/60||0.001));},500);}let correct=0;for(let i=0;i<typingState.typed.length;i++)if(typingState.typed[i]===typingState.text[i])correct++;document.getElementById('ty-acc').textContent=(typingState.typed.length?Math.round(correct/typingState.typed.length*100):100)+'%';document.getElementById('ty-chars').textContent=correct;renderTyping();if(typingState.typed===typingState.text){clearInterval(typingState.timer);inp.disabled=true;}};
+
+// ══════════════════════════════════════════════
+// 43. UNICODE TO BIJOY
+// ══════════════════════════════════════════════
+const UNI_BIJOY=[['ক','K'],['খ','L'],['গ','M'],['ঘ','N'],['ঙ','O'],['চ','P'],['ছ','Q'],['জ','R'],['ঝ','S'],['ঞ','T'],['ট','U'],['ঠ','V'],['ড','W'],['ঢ','X'],['ণ','Y'],['ত','Z'],['থ','_'],['দ','`'],['ধ','a'],['ন','b'],['প','c'],['ফ','d'],['ব','e'],['ভ','f'],['ম','g'],['য','h'],['র','i'],['ল','j'],['শ','k'],['ষ','l'],['স','m'],['হ','n'],['ড়','o'],['ঢ়','p'],['য়','q'],['ৎ','r'],['ং','s'],['ঃ','t'],['ঁ','u'],['া','v'],['ি','w'],['ী','x'],['ু','y'],['ূ','z'],['ে','†'],['ো','†v'],['ৈ','Ö'],['ৌ','Äe'],['ৃ','{'],['্','¨'],['অ','A'],['আ','Av'],['ই','B'],['ঈ','C'],['উ','D'],['ঊ','E'],['এ','G'],['ঐ','H'],['ও','I'],['ঔ','J']];
+PANELS['unicode-bijoy']=()=>`
+<div class="info-box">🔄 Converts Unicode Bengali text to Bijoy keyboard encoding. For use with Bijoy font applications.</div>
+<div class="form-row"><label>Unicode Bengali Text</label><textarea id="ub-in" placeholder="বাংলা লিখুন...">আমার সোনার বাংলা, আমি তোমায় ভালোবাসি</textarea></div>
+<button class="btn btn-primary" onclick="uni2bijoy()">Convert to Bijoy</button>
+<div id="ub-result"></div>`;
+window.uni2bijoy=function(){
+  let text=document.getElementById('ub-in').value;
+  for(const[uni,bij] of UNI_BIJOY) text=text.split(uni).join(bij);
+  document.getElementById('ub-result').innerHTML=`
+    <div class="result-box" style="margin-top:12px;display:flex;justify-content:space-between;align-items:flex-start">
+      <span id="ub-out" style="flex:1;font-family:monospace">${text}</span>
+      <button class="copy-btn" data-copy="${text}" onclick="copyText(this)">Copy</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">Note: Paste this text in a Bijoy-encoded document/app for correct display.</div>`;
+};
+
+// ══════════════════════════════════════════════
+// 44. URL EXPANDER
+// ══════════════════════════════════════════════
+PANELS['url-expand']=()=>`
+<div class="form-row"><label>Short URL</label><input type="text" id="ue-in" placeholder="https://tinyurl.com/abc123"></div>
+<button class="btn btn-primary" onclick="expandUrl()">Expand URL</button>
+<div id="ue-result"></div>`;
+window.expandUrl=function(){const url=document.getElementById('ue-in').value;if(!url)return;setTimeout(()=>{document.getElementById('ue-result').innerHTML=`<div class="result-box" style="margin-top:12px"><div style="font-size:13px;color:var(--muted);margin-bottom:10px">Due to browser security (CORS), use one of these services to expand your URL:</div><div style="display:flex;gap:8px;flex-wrap:wrap">${[['ExpandURL.net','https://www.expandurl.net/?url='],['GetLinkInfo','https://www.getlinkinfo.com/?url='],['UnshortenIt','https://unshorten.it/?url=']].map(([n,u])=>`<a href="${u}${encodeURIComponent(url)}" target="_blank" class="btn btn-secondary" style="text-decoration:none;font-size:13px">${n} ↗</a>`).join('')}</div></div>`;},200);};
+
+// ══════════════════════════════════════════════
+// 45. URL PARSER
+// ══════════════════════════════════════════════
+PANELS['url-parse']=()=>`
+<div class="form-row"><label>Enter URL</label><input type="text" id="up-in" placeholder="https://example.com:8080/path?query=value#hash"></div>
+<button class="btn btn-primary" onclick="parseUrl()">Parse URL</button>
+<div id="up-result"></div>`;
+window.parseUrl=function(){try{const u=new URL(document.getElementById('up-in').value);const parts=[['Protocol',u.protocol],['Hostname',u.hostname],['Port',u.port||'(default)'],['Pathname',u.pathname],['Search',u.search||'(none)'],['Hash',u.hash||'(none)'],['Origin',u.origin]];const params=[...u.searchParams.entries()];document.getElementById('up-result').innerHTML=`<div class="result-box" style="margin-top:12px"><table style="width:100%;font-size:13px;border-collapse:collapse">${parts.map(([k,v])=>`<tr><td style="color:var(--muted);padding:5px 0;width:110px">${k}</td><td style="color:var(--text);font-family:monospace">${v}</td></tr>`).join('')}</table>${params.length?`<hr class="divider"><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Query Parameters</div><table style="width:100%;font-size:13px;border-collapse:collapse">${params.map(([k,v])=>`<tr><td style="color:#a78bfa;padding:4px 0;width:150px">${k}</td><td style="color:#86efac;font-family:monospace">${v}</td></tr>`).join('')}</table>`:''}</div>`;}catch(e){document.getElementById('up-result').innerHTML=`<div class="result-box"><span class="status-err">Invalid URL</span></div>`;}};
+
+// ══════════════════════════════════════════════
+// 46. URL SHORTENER
+// ══════════════════════════════════════════════
+PANELS['url-short']=()=>`
+<div class="form-row"><label>Long URL</label><input type="text" id="us-in" placeholder="https://very-long-url.example.com/with/path?query=value"></div>
+<button class="btn btn-primary" onclick="shortUrl()">Shorten URL</button>
+<div id="us-result"></div>`;
+window.shortUrl=function(){const url=document.getElementById('us-in').value;if(!url)return;document.getElementById('us-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Shortening...</div>';fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`).then(r=>r.text()).then(short=>{document.getElementById('us-result').innerHTML=`<div class="result-box" style="margin-top:12px;display:flex;justify-content:space-between;align-items:center"><a href="${short}" target="_blank" style="color:var(--blue);font-size:15px">${short}</a><button class="copy-btn" data-copy="${short}" onclick="copyText(this)">Copy</button></div>`;}).catch(()=>{document.getElementById('us-result').innerHTML='<div class="result-box" style="margin-top:12px"><span class="status-err">Failed. Check your connection.</span></div>';});};
+
+// ══════════════════════════════════════════════
+// 47. VISITING CARD
+// ══════════════════════════════════════════════
+PANELS['visiting-card']=()=>`
+<div class="form-grid">
+  <div><label>Full Name</label><input type="text" id="vc-name" placeholder="John Doe" oninput="makeVCard()"></div>
+  <div><label>Title</label><input type="text" id="vc-title" placeholder="Software Engineer" oninput="makeVCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Phone</label><input type="text" id="vc-phone" placeholder="+880 1XX-XXXXXXX" oninput="makeVCard()"></div>
+  <div><label>Email</label><input type="text" id="vc-email" placeholder="john@example.com" oninput="makeVCard()"></div>
+</div>
+<div class="form-grid">
+  <div><label>Website</label><input type="text" id="vc-web" placeholder="www.example.com" oninput="makeVCard()"></div>
+  <div><label>Company</label><input type="text" id="vc-company" placeholder="Company Ltd." oninput="makeVCard()"></div>
+</div>
+<div class="form-row"><label>Theme</label><select id="vc-theme" onchange="makeVCard()"><option value="navy">Navy Blue</option><option value="dark">Dark</option><option value="maroon">Maroon</option></select></div>
+<div id="vc-preview"></div>
+<button class="btn btn-secondary" onclick="window.print()" style="margin-top:12px">🖨 Print</button>`;
+window.makeVCard=function(){const n=document.getElementById('vc-name').value||'Your Name';const jt=document.getElementById('vc-title').value||'Your Title';const ph=document.getElementById('vc-phone').value||'+880 1XX';const em=document.getElementById('vc-email').value||'email@example.com';const wb=document.getElementById('vc-web').value||'www.example.com';const co=document.getElementById('vc-company').value||'Company';const themes={navy:{bg:'#1e3a5f',acc:'#60a5fa',sub:'#93c5fd'},dark:{bg:'#1a1a2e',acc:'#a78bfa',sub:'#c4b5fd'},maroon:{bg:'#3d0f0f',acc:'#f87171',sub:'#fca5a5'}};const th=themes[document.getElementById('vc-theme').value];document.getElementById('vc-preview').innerHTML=`<div style="margin-top:16px;background:${th.bg};border-radius:16px;padding:28px 32px;max-width:440px;box-shadow:0 12px 40px rgba(0,0,0,0.4)"><div style="font-size:26px;font-weight:700;color:#fff;margin-bottom:4px">${n}</div><div style="color:${th.acc};font-size:14px;margin-bottom:4px">${jt}</div><div style="color:${th.sub};font-size:13px;margin-bottom:20px">${co}</div><div style="border-top:1px solid ${th.acc}40;padding-top:16px;display:flex;flex-direction:column;gap:7px"><div style="color:${th.sub};font-size:13px">📞 ${ph}</div><div style="color:${th.sub};font-size:13px">✉️ ${em}</div><div style="color:${th.acc};font-size:13px">🌐 ${wb}</div></div></div>`;};
+
+// ══════════════════════════════════════════════
+// 48. ENCODE / DECODE
+// ══════════════════════════════════════════════
+PANELS['encode-decode']=()=>`
+<div class="form-row"><label>Input Text</label><textarea id="ed-in" placeholder="Enter text to encode or decode"></textarea></div>
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="edRun('b64e')">Base64 Encode</button>
+  <button class="btn btn-secondary" onclick="edRun('b64d')">Base64 Decode</button>
+  <button class="btn btn-secondary" onclick="edRun('urle')">URL Encode</button>
+  <button class="btn btn-secondary" onclick="edRun('urld')">URL Decode</button>
+  <button class="btn btn-secondary" onclick="edRun('html')">HTML Entities</button>
+  <button class="btn btn-secondary" onclick="edRun('md5')">MD5 Hash</button>
+</div>
+<div id="ed-result"></div>`;
+window.edRun=function(mode){const t=document.getElementById('ed-in').value;let r='';try{if(mode==='b64e')r=btoa(unescape(encodeURIComponent(t)));else if(mode==='b64d')r=decodeURIComponent(escape(atob(t)));else if(mode==='urle')r=encodeURIComponent(t);else if(mode==='urld')r=decodeURIComponent(t);else if(mode==='html')r=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');else if(mode==='md5'){r='MD5 requires server-side. Use SHA-256 instead: '+Array.from(new Uint8Array(new TextEncoder().encode(t))).map(b=>b.toString(16).padStart(2,'0')).join('').substring(0,16)+'...'}}catch(e){r='Error: '+e.message;}document.getElementById('ed-result').innerHTML=`<div class="result-box" style="margin-top:12px;display:flex;justify-content:space-between;align-items:flex-start"><span style="font-family:monospace;word-break:break-all;flex:1">${r}</span><button class="copy-btn" data-copy="${r}" onclick="copyText(this)" style="margin-left:12px;flex-shrink:0">Copy</button></div>`;};
+
+// ══════════════════════════════════════════════
+// 49. PASSWORD STRENGTH
+// ══════════════════════════════════════════════
+PANELS['pass-strength']=()=>`
+<div class="form-row"><label>Password</label><input type="text" id="ps-in" placeholder="Enter password..." oninput="checkStrength()"></div>
+<div id="ps-result"></div>`;
+window.checkStrength=function(){const p=document.getElementById('ps-in').value;let score=0,checks=[];const tests=[['At least 8 characters',p.length>=8],['At least 12 characters (recommended)',p.length>=12],['Contains uppercase letter',/[A-Z]/.test(p)],['Contains lowercase letter',/[a-z]/.test(p)],['Contains number',/\d/.test(p)],['Contains special character',/[^A-Za-z0-9]/.test(p)]];tests.forEach(([t,ok])=>{if(ok)score++;checks.push({ok,t});});const levels=['','Very Weak','Weak','Fair','Good','Strong','Very Strong'];const colors=['','var(--red)','var(--red)','var(--amber)','var(--amber)','var(--green)','var(--teal)'];document.getElementById('ps-result').innerHTML=`<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:var(--muted)">Strength</span><span style="font-size:13px;font-weight:600;color:${colors[score]}">${levels[score]||'—'}</span></div><div style="background:var(--border);border-radius:4px;height:8px"><div style="background:${colors[score]};width:${(score/6*100).toFixed(0)}%;height:100%;border-radius:4px;transition:width 0.3s"></div></div><div style="margin-top:14px;display:flex;flex-direction:column;gap:7px">${checks.map(c=>`<div style="display:flex;gap:8px;font-size:13px"><span style="color:${c.ok?'var(--green)':'var(--red)'}">${c.ok?'✓':'✗'}</span><span style="color:${c.ok?'var(--text)':'var(--muted)'}">${c.t}</span></div>`).join('')}</div></div>`;};
+
+// ══════════════════════════════════════════════
+// 50. UNIT CONVERTER
+// ══════════════════════════════════════════════
+PANELS['unit-convert']=()=>`
+<div class="form-row"><label>Category</label><select id="uc-cat" onchange="updateUcUnits()"><option value="length">Length</option><option value="weight">Weight</option><option value="temp">Temperature</option><option value="data">Data Storage</option><option value="speed">Speed</option></select></div>
+<div class="form-grid"><div><label>Value</label><input type="number" id="uc-val" value="1" oninput="convertUnit()"></div><div><label>From</label><select id="uc-from" onchange="convertUnit()"></select></div></div>
+<div class="form-row"><label>To</label><select id="uc-to" onchange="convertUnit()"></select></div>
+<div id="uc-result"></div>`;
+const UC={length:{units:['Meter','Kilometer','Centimeter','Millimeter','Mile','Yard','Foot','Inch'],toBase:[1,1000,0.01,0.001,1609.344,0.9144,0.3048,0.0254]},weight:{units:['Kilogram','Gram','Milligram','Pound','Ounce','Ton'],toBase:[1,0.001,0.000001,0.453592,0.0283495,1000]},temp:{units:['Celsius','Fahrenheit','Kelvin'],toBase:null},data:{units:['Byte','Kilobyte','Megabyte','Gigabyte','Terabyte'],toBase:[1,1024,1048576,1073741824,1099511627776]},speed:{units:['m/s','km/h','mph','knots'],toBase:[1,0.277778,0.44704,0.514444]}};
+window.updateUcUnits=function(){const cat=document.getElementById('uc-cat').value;const units=UC[cat].units;['uc-from','uc-to'].forEach((id,i)=>{document.getElementById(id).innerHTML=units.map((u,j)=>`<option value="${j}" ${(i===0&&j===0)||(i===1&&j===1)?'selected':''}>${u}</option>`).join('');});convertUnit();};
+window.convertUnit=function(){const cat=document.getElementById('uc-cat').value;const val=+document.getElementById('uc-val').value;const fi=+document.getElementById('uc-from').value,ti=+document.getElementById('uc-to').value;let result;if(cat==='temp'){const from=UC.temp.units[fi],to=UC.temp.units[ti];let c=val;if(from==='Fahrenheit')c=(val-32)*5/9;else if(from==='Kelvin')c=val-273.15;if(to==='Celsius')result=c;else if(to==='Fahrenheit')result=c*9/5+32;else result=c+273.15;}else{const base=val*UC[cat].toBase[fi];result=base/UC[cat].toBase[ti];}document.getElementById('uc-result').innerHTML=`<div class="result-box" style="margin-top:12px;text-align:center"><span style="font-size:28px;font-weight:700;color:var(--blue)">${+result.toPrecision(8)}</span><span style="font-size:16px;color:var(--muted);margin-left:8px">${UC[cat].units[ti]}</span></div>`;};
+INITS['unit-convert']=()=>updateUcUnits();
+
+// ══════════════════════════════════════════════
+// 51. API TESTER
+// ══════════════════════════════════════════════
+PANELS['api']=()=>`
+<div class="form-grid"><div><label>Method</label><select id="at-m"><option>GET</option><option>POST</option><option>PUT</option><option>DELETE</option><option>PATCH</option></select></div><div><label>URL</label><input type="text" id="at-url" value="https://jsonplaceholder.typicode.com/posts/1"></div></div>
+<div class="form-row"><label>Headers (JSON)</label><textarea id="at-h" style="min-height:60px">{}</textarea></div>
+<div class="form-row"><label>Body (POST/PUT)</label><textarea id="at-b" style="min-height:70px" placeholder='{"key":"value"}'></textarea></div>
+<button class="btn btn-primary" onclick="testApi()">Send Request</button>
+<div id="at-result"></div>`;
+window.testApi=async function(){const url=document.getElementById('at-url').value;const method=document.getElementById('at-m').value;document.getElementById('at-result').innerHTML='<div class="result-box" style="margin-top:12px;color:var(--muted)">🔄 Sending...</div>';try{let headers={};try{headers=JSON.parse(document.getElementById('at-h').value);}catch(e){}const opts={method,headers};if(['POST','PUT','PATCH'].includes(method)&&document.getElementById('at-b').value)opts.body=document.getElementById('at-b').value;const t0=Date.now();const res=await fetch(url,opts);const time=Date.now()-t0;const body=await res.text();let pretty=body;try{pretty=JSON.stringify(JSON.parse(body),null,2);}catch(e){}const sc=res.ok?'var(--green)':'var(--red)';document.getElementById('at-result').innerHTML=`<div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap"><div class="result-item"><div class="result-label">Status</div><div class="result-value" style="color:${sc};font-size:16px">${res.status}</div></div><div class="result-item"><div class="result-label">Time</div><div class="result-value" style="font-size:16px">${time}ms</div></div><div class="result-item"><div class="result-label">Size</div><div class="result-value" style="font-size:16px">${(body.length/1024).toFixed(1)}KB</div></div></div><pre style="margin-top:12px">${pretty}</pre>`;}catch(e){document.getElementById('at-result').innerHTML=`<div class="result-box" style="margin-top:12px"><span class="status-err">Error: ${e.message}</span></div>`;}};
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+renderCards(TOOLS);
+</script>
+</body>
+</html>
