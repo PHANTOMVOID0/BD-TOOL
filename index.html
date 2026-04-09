@@ -324,29 +324,46 @@ window.csDownloadPDF=function(){
 // 2. AGE CALCULATOR
 // ══════════════════════════════════════════════
 PANELS['age'] = () => `
-<div class="sa-card">
+<div class="sa-wrapper">
 
-  <div class="sa-header">
-    <div>
-      <h2>Smart Age Intelligence</h2>
+  <!-- HEADER -->
+  <div class="sa-top">
+    <div class="sa-title">
+      <div class="sa-icon">🎂</div>
+      <div>
+        <h2>Smart Age Calculator</h2>
+      </div>
     </div>
     <div id="sa-live"></div>
   </div>
 
-  <div class="form-grid">
-    <div>
-      <label>Date of Birth</label>
-      <input type="date" id="ag-dob" max="${new Date().toISOString().split('T')[0]}">
+  <!-- CARD -->
+  <div class="sa-card">
+
+    <h3>Calculate exact age</h3>
+    <p class="sa-sub">Enter birth date</p>
+
+    <!-- INPUT MODE -->
+    <div class="sa-mode">
+
     </div>
-    <div>
-      <label>Calculate on</label>
-      <input type="date" id="ag-today" value="${new Date().toISOString().split('T')[0]}">
+
+    <!-- INPUTS -->
+    <div class="sa-inputs">
+      <input type="number" id="day" placeholder="Day (DD)">
+      <input type="number" id="month" placeholder="Month (MM)">
+      <input type="number" id="year" placeholder="Year (YYYY)">
     </div>
+
+    <!-- BUTTONS -->
+    <div class="sa-btns">
+      <button class="sa-calc" onclick="calcAge()">Calculate age</button>
+      <button class="sa-reset" onclick="resetAge()">Reset</button>
+    </div>
+
+    <div id="ag-result"></div>
+
   </div>
-
-  <button class="btn btn-primary" onclick="calcAge()">Calculate Age</button>
-
-  <div id="ag-result"></div>
 
 </div>
 
