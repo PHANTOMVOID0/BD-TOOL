@@ -323,32 +323,158 @@ window.csDownloadPDF=function(){
 // ══════════════════════════════════════════════
 // 2. AGE CALCULATOR
 // ══════════════════════════════════════════════
-PANELS['age']=()=>`
-<div class="form-grid">
-  <div><label>Date of Birth</label><input type="date" id="ag-dob" max="${new Date().toISOString().split('T')[0]}"></div>
-  <div><label>Calculate on</label><input type="date" id="ag-today" value="${new Date().toISOString().split('T')[0]}"></div>
+PANELS['age'] = () => `
+<div class="sa-card">
+
+  <div class="sa-header">
+    <div>
+      <h2>Smart Age Intelligence</h2>
+      <small>Age snapshot</small>
+    </div>
+    <div id="sa-live"></div>
+  </div>
+
+  <div class="form-grid">
+    <div>
+      <label>Date of Birth</label>
+      <input type="date" id="ag-dob" max="${new Date().toISOString().split('T')[0]}">
+    </div>
+    <div>
+      <label>Calculate on</label>
+      <input type="date" id="ag-today" value="${new Date().toISOString().split('T')[0]}">
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="calcAge()">Calculate Age</button>
+
+  <div id="ag-result"></div>
+
 </div>
-<button class="btn btn-primary" onclick="calcAge()">Calculate Age</button>
-<div id="ag-result"></div>`;
+
+<style>
+.sa-card{
+  background: linear-gradient(135deg,#020617,#0a1f44,#020617);
+  color:#e2e8f0;
+  padding:20px;
+  border-radius:16px;
+}
+
+.sa-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+.sa-header h2{
+  color:#22c55e;
+  margin:0;
+}
+
+.sa-main h1{
+  font-size:42px;
+  margin:10px 0;
+}
+
+.sa-main h2{
+  color:#94a3b8;
+}
+
+.sa-next{
+  color:#22c55e;
+  margin-top:15px;
+}
+
+.sa-grid{
+  margin-top:15px;
+  font-size:14px;
+  color:#cbd5f5;
+}
+
+</style>
+`;
+
+// 🔥 LIVE CLOCK (safe run)
+setInterval(()=>{
+  const el=document.getElementById('sa-live');
+  if(el){
+    el.innerText=new Date().toLocaleTimeString();
+  }
+},1000);
+
+
+// 🔥 MAIN FUNCTION
 window.calcAge=function(){
+
   const dob=new Date(document.getElementById('ag-dob').value);
   const ref=new Date(document.getElementById('ag-today').value);
   if(isNaN(dob)||isNaN(ref))return;
-  let y=ref.getFullYear()-dob.getFullYear(),m=ref.getMonth()-dob.getMonth(),d=ref.getDate()-dob.getDate();
-  if(d<0){m--;d+=new Date(ref.getFullYear(),ref.getMonth(),0).getDate();}
-  if(m<0){y--;m+=12;}
-  const td=Math.floor((ref-dob)/86400000);
-  const nxt=new Date(ref.getFullYear()+(ref.getMonth()>dob.getMonth()||(ref.getMonth()===dob.getMonth()&&ref.getDate()>=dob.getDate())?1:0),dob.getMonth(),dob.getDate());
-  const daysToNext=Math.floor((nxt-ref)/86400000);
+
+  let y=ref.getFullYear()-dob.getFullYear();
+  let m=ref.getMonth()-dob.getMonth();
+  let d=ref.getDate()-dob.getDate();
+
+  if(d<0){
+    m--;
+    d+=new Date(ref.getFullYear(),ref.getMonth(),0).getDate();
+  }
+  if(m<0){
+    y--;
+    m+=12;
+  }
+
+  const totalDays=Math.floor((ref-dob)/86400000);
+  const totalWeeks=Math.floor(totalDays/7);
+  const totalMonths=y*12+m;
+
+  // 🎂 Next Birthday Countdown
+  const nextBirthday=new Date(
+    ref.getFullYear()+
+    (ref.getMonth()>dob.getMonth()||(ref.getMonth()===dob.getMonth()&&ref.getDate()>=dob.getDate())?1:0),
+    dob.getMonth(),
+    dob.getDate()
+  );
+
+  const daysToNext=Math.floor((nextBirthday-ref)/86400000);
+
+  // 🇧🇩 Bangla Date
+  const bangla=new Intl.DateTimeFormat('bn-BD',{
+    day:'numeric',month:'long',year:'numeric'
+  }).format(ref);
+
+  // 🌙 Hijri Date
+  const hijri=new Intl.DateTimeFormat('ar-TN-u-ca-islamic',{
+    day:'numeric',month:'long',year:'numeric'
+  }).format(ref);
+
+  // 📊 Life Progress
+  const lifeProgress=((totalDays/(75*365))*100).toFixed(1);
+
   document.getElementById('ag-result').innerHTML=`
-  <div class="result-grid">
-    <div class="result-item"><div class="result-label">Years</div><div class="result-value">${y}</div></div>
-    <div class="result-item"><div class="result-label">Months</div><div class="result-value">${m}</div></div>
-    <div class="result-item"><div class="result-label">Days</div><div class="result-value">${d}</div></div>
-    <div class="result-item"><div class="result-label">Total Days</div><div class="result-value" style="font-size:16px">${td.toLocaleString()}</div></div>
-    <div class="result-item"><div class="result-label">Next Birthday</div><div class="result-value" style="font-size:15px">${daysToNext} days</div></div>
-    <div class="result-item"><div class="result-label">Total Weeks</div><div class="result-value" style="font-size:16px">${Math.floor(td/7).toLocaleString()}</div></div>
-  </div>`;
+  
+  <div class="sa-main">
+    <h1>${y} YEARS</h1>
+    <h2>${m} MONTHS ${d} DAYS</h2>
+  </div>
+
+  <div class="sa-next">
+    <div>Next birthday</div>
+    <h2>${daysToNext} DAYS</h2>
+  </div>
+
+  <div class="sa-grid">
+    <p><b>Total Days:</b> ${totalDays.toLocaleString()}</p>
+    <p><b>Total Weeks:</b> ${totalWeeks.toLocaleString()}</p>
+    <p><b>Total Months:</b> ${totalMonths}</p>
+    <p><b>Life Progress:</b> ${lifeProgress}%</p>
+  </div>
+
+  <div class="sa-grid">
+    <p><b>Bangla Date:</b> ${bangla}</p>
+    <p><b>Hijri Date:</b> ${hijri}</p>
+  </div>
+
+  `;
 };
 
 // ══════════════════════════════════════════════
