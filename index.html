@@ -343,16 +343,11 @@ PANELS['age'] = () => `
     <h3>Calculate exact age</h3>
     <p class="sa-sub">Enter birth date</p>
 
-    <!-- INPUT MODE -->
-    <div class="sa-mode">
-
-    </div>
-
     <!-- INPUTS -->
     <div class="sa-inputs">
-      <input type="number" id="day" placeholder="Day (DD)">
-      <input type="number" id="month" placeholder="Month (MM)">
-      <input type="number" id="year" placeholder="Year (YYYY)">
+      <input type="number" id="day" placeholder="Day (DD)" min="1" max="31">
+      <input type="number" id="month" placeholder="Month (MM)" min="1" max="12">
+      <input type="number" id="year" placeholder="Year (YYYY)" min="1900" max="2100">
     </div>
 
     <!-- BUTTONS -->
@@ -368,131 +363,195 @@ PANELS['age'] = () => `
 </div>
 
 <style>
-.sa-card{
-  background: linear-gradient(135deg,#020617,#0a1f44,#020617);
+.sa-wrapper{
+  background: radial-gradient(circle at top,#020617,#020617,#030b1f,#071a3a);
+  padding:15px;
   color:#e2e8f0;
-  padding:20px;
-  border-radius:16px;
 }
 
-.sa-header{
+.sa-top{
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:15px;
 }
 
-.sa-header h2{
-  color:#22c55e;
+.sa-title{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.sa-icon{
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  padding:10px;
+  border-radius:12px;
+  box-shadow:0 0 15px rgba(37,99,235,0.6);
+}
+
+.sa-title h2{
   margin:0;
+  color:#3b82f6;
 }
 
-.sa-main h1{
-  font-size:42px;
-  margin:10px 0;
+.sa-card{
+  background:linear-gradient(145deg,#020617,#071a3a);
+  padding:20px;
+  border-radius:20px;
+  border:1px solid rgba(59,130,246,0.2);
+  box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
-.sa-main h2{
+.sa-inputs input{
+  width:100%;
+  margin:8px 0;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #1e3a8a;
+  background:#020617;
+  color:#fff;
+}
+
+.sa-btns{
+  display:flex;
+  gap:10px;
+  margin-top:15px;
+}
+
+.sa-calc{
+  flex:1;
+  background:linear-gradient(135deg,#2563eb,#1d4ed8);
+  border:none;
+  padding:12px;
+  border-radius:12px;
+  font-weight:bold;
+  color:#fff;
+  box-shadow:0 0 15px rgba(37,99,235,0.6);
+}
+
+.sa-reset{
+  flex:1;
+  background:#0f172a;
+  border:none;
+  padding:12px;
+  border-radius:12px;
   color:#94a3b8;
 }
 
+.sa-main h1{
+  font-size:36px;
+  color:#3b82f6;
+}
+
 .sa-next{
-  color:#22c55e;
-  margin-top:15px;
+  color:#60a5fa;
 }
 
 .sa-grid{
-  margin-top:15px;
-  font-size:14px;
   color:#cbd5f5;
 }
-
 </style>
 `;
 
-// 🔥 LIVE CLOCK (safe run)
+// ✅ LIVE CLOCK (safe)
 setInterval(()=>{
   const el=document.getElementById('sa-live');
-  if(el){
-    el.innerText=new Date().toLocaleTimeString();
-  }
+  if(el) el.innerText=new Date().toLocaleTimeString();
 },1000);
 
 
-// 🔥 MAIN FUNCTION
+// ✅ RESET
+window.resetAge=function(){
+  ['day','month','year'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  document.getElementById('ag-result').innerHTML='';
+};
+
+
+// ✅ CALCULATE
 window.calcAge=function(){
 
-  const dob=new Date(document.getElementById('ag-dob').value);
-  const ref=new Date(document.getElementById('ag-today').value);
-  if(isNaN(dob)||isNaN(ref))return;
+  const d=parseInt(document.getElementById('day').value);
+  const m=parseInt(document.getElementById('month').value);
+  const y=parseInt(document.getElementById('year').value);
 
-  let y=ref.getFullYear()-dob.getFullYear();
-  let m=ref.getMonth()-dob.getMonth();
-  let d=ref.getDate()-dob.getDate();
-
-  if(d<0){
-    m--;
-    d+=new Date(ref.getFullYear(),ref.getMonth(),0).getDate();
+  // ✅ Validation
+  if(!d || !m || !y){
+    alert("Please enter complete date");
+    return;
   }
-  if(m<0){
-    y--;
-    m+=12;
+
+  if(m<1 || m>12 || d<1 || d>31){
+    alert("Invalid date");
+    return;
+  }
+
+  const dob=new Date(y,m-1,d);
+  if(isNaN(dob.getTime())){
+    alert("Invalid date");
+    return;
+  }
+
+  const ref=new Date();
+
+  let yy=ref.getFullYear()-dob.getFullYear();
+  let mm=ref.getMonth()-dob.getMonth();
+  let dd=ref.getDate()-dob.getDate();
+
+  if(dd<0){
+    mm--;
+    dd+=new Date(ref.getFullYear(),ref.getMonth(),0).getDate();
+  }
+  if(mm<0){
+    yy--;
+    mm+=12;
   }
 
   const totalDays=Math.floor((ref-dob)/86400000);
-  const totalWeeks=Math.floor(totalDays/7);
-  const totalMonths=y*12+m;
 
-  // 🎂 Next Birthday Countdown
-  const nextBirthday=new Date(
+  // 🎂 NEXT BIRTHDAY
+  const next=new Date(
     ref.getFullYear()+
     (ref.getMonth()>dob.getMonth()||(ref.getMonth()===dob.getMonth()&&ref.getDate()>=dob.getDate())?1:0),
     dob.getMonth(),
     dob.getDate()
   );
 
-  const daysToNext=Math.floor((nextBirthday-ref)/86400000);
+  const nextDays=Math.floor((next-ref)/86400000);
 
-  // 🇧🇩 Bangla Date
+  // 🇧🇩 Bangla
   const bangla=new Intl.DateTimeFormat('bn-BD',{
     day:'numeric',month:'long',year:'numeric'
   }).format(ref);
 
-  // 🌙 Hijri Date
+  // 🌙 Hijri
   const hijri=new Intl.DateTimeFormat('ar-TN-u-ca-islamic',{
     day:'numeric',month:'long',year:'numeric'
   }).format(ref);
 
-  // 📊 Life Progress
-  const lifeProgress=((totalDays/(75*365))*100).toFixed(1);
-
   document.getElementById('ag-result').innerHTML=`
-  
-  <div class="sa-main">
-    <h1>${y} YEARS</h1>
-    <h2>${m} MONTHS ${d} DAYS</h2>
-  </div>
+  <div class="sa-result">
 
-  <div class="sa-next">
-    <div>Next birthday</div>
-    <h2>${daysToNext} DAYS</h2>
-  </div>
+    <div class="sa-main">
+      <h1>${yy} YEARS</h1>
+      <h3>${mm} MONTHS ${dd} DAYS</h3>
+    </div>
 
-  <div class="sa-grid">
-    <p><b>Total Days:</b> ${totalDays.toLocaleString()}</p>
-    <p><b>Total Weeks:</b> ${totalWeeks.toLocaleString()}</p>
-    <p><b>Total Months:</b> ${totalMonths}</p>
-    <p><b>Life Progress:</b> ${lifeProgress}%</p>
-  </div>
+    <div class="sa-next">
+      Next birthday in <b>${nextDays} days</b>
+    </div>
 
-  <div class="sa-grid">
-    <p><b>Bangla Date:</b> ${bangla}</p>
-    <p><b>Hijri Date:</b> ${hijri}</p>
-  </div>
+    <div class="sa-grid">
+      <p>Total Days: ${totalDays.toLocaleString()}</p>
+      <p>Bangla Date: ${bangla}</p>
+      <p>Hijri Date: ${hijri}</p>
+    </div>
 
+  </div>
   `;
 };
-
 // ══════════════════════════════════════════════
 // 3. BANGLA LOGO MAKER
 // ══════════════════════════════════════════════
