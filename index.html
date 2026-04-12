@@ -321,237 +321,268 @@ window.csDownloadPDF=function(){
 };
 
 // ══════════════════════════════════════════════
-// 2. AGE CALCULATOR
+// 2. AGE CALCULATOR (CHRONO HERO UI)
 // ══════════════════════════════════════════════
+
 PANELS['age'] = () => `
-<div class="sa-wrapper">
+<div class="chrono-hero">
 
-  <!-- HEADER -->
-  <div class="sa-top">
-    <div class="sa-title">
-      <div class="sa-icon">🎂</div>
-      <div>
-        <h2>Smart Age Calculator</h2>
-      </div>
+  <!-- TOP BAR -->
+  <div class="chrono-head">
+    <div>
+      <h2>Smart Age Calculator</h2>
     </div>
-    <div id="sa-live"></div>
+    <div class="chrono-time">
+      <div id="sa-live"></div>
+      <div id="sa-week"></div>
+    </div>
   </div>
 
-  <!-- CARD -->
-  <div class="sa-card">
-
-    <h3>Calculate exact age</h3>
-    <p class="sa-sub">Enter birth date</p>
-
-    <!-- INPUTS -->
-    <div class="sa-inputs">
-      <input type="number" id="day" placeholder="Day (DD)" min="1" max="31">
-      <input type="number" id="month" placeholder="Month (MM)" min="1" max="12">
-      <input type="number" id="year" placeholder="Year (YYYY)" min="1900" max="2100">
-    </div>
-
-    <!-- BUTTONS -->
-    <div class="sa-btns">
-      <button class="sa-calc" onclick="calcAge()">Calculate age</button>
-      <button class="sa-reset" onclick="resetAge()">Reset</button>
-    </div>
-
-    <div id="ag-result"></div>
-
+  <!-- INPUT -->
+  <div class="chrono-inputs">
+    <input type="number" id="day" placeholder="DD">
+    <input type="number" id="month" placeholder="MM">
+    <input type="number" id="year" placeholder="YYYY">
+    <button onclick="calcAge()">Calculate</button>
   </div>
+
+  <!-- RESULT -->
+  <div id="ag-result"></div>
 
 </div>
 
 <style>
-.sa-wrapper{
-  background: radial-gradient(circle at top,#020617,#020617,#030b1f,#071a3a);
-  padding:15px;
-  color:#e2e8f0;
+
+/* 🌌 HERO BACKGROUND (NAVY + RED GLOW) */
+.chrono-hero{
+  padding:25px;
+  border-radius:16px;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(239,68,68,0.15), transparent 40%),
+    radial-gradient(circle at 80% 100%, rgba(37,99,235,0.15), transparent 40%),
+    linear-gradient(120deg,#020617,#041b2d,#020617);
+
+  color:#fff;
+  animation:fadeIn 0.6s ease;
 }
 
-.sa-top{
+/* 🔝 TOP */
+.chrono-head{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
+  margin-bottom:20px;
 }
 
-.sa-title{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.sa-icon{
-  background:linear-gradient(135deg,#1d4ed8,#2563eb);
-  padding:10px;
-  border-radius:12px;
-  box-shadow:0 0 15px rgba(37,99,235,0.6);
-}
-
-.sa-title h2{
+.chrono-head h2{
+  color:#ef4444; /* RED */
   margin:0;
-  color:#3b82f6;
 }
 
-.sa-card{
-  background:linear-gradient(145deg,#020617,#071a3a);
-  padding:20px;
-  border-radius:20px;
-  border:1px solid rgba(59,130,246,0.2);
-  box-shadow:0 10px 30px rgba(0,0,0,0.6);
-}
-
-.sa-inputs input{
-  width:100%;
-  margin:8px 0;
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #1e3a8a;
-  background:#020617;
-  color:#fff;
-}
-
-.sa-btns{
-  display:flex;
-  gap:10px;
-  margin-top:15px;
-}
-
-.sa-calc{
-  flex:1;
-  background:linear-gradient(135deg,#2563eb,#1d4ed8);
-  border:none;
-  padding:12px;
-  border-radius:12px;
-  font-weight:bold;
-  color:#fff;
-  box-shadow:0 0 15px rgba(37,99,235,0.6);
-}
-
-.sa-reset{
-  flex:1;
-  background:#0f172a;
-  border:none;
-  padding:12px;
-  border-radius:12px;
+.chrono-head span{
+  font-size:12px;
   color:#94a3b8;
 }
 
-.sa-main h1{
-  font-size:36px;
-  color:#3b82f6;
+.chrono-time{
+  text-align:right;
+  font-size:12px;
+  color:#94a3b8;
 }
 
-.sa-next{
-  color:#60a5fa;
+/* INPUT */
+.chrono-inputs{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
 
-.sa-grid{
+.chrono-inputs input{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.05);
+  background:#0f172a;
+  color:#fff;
+  transition:0.25s;
+}
+
+.chrono-inputs input:focus{
+  border-color:#ef4444;
+  box-shadow:0 0 10px rgba(239,68,68,0.4);
+  transform:scale(1.03);
+}
+
+/* BUTTON */
+.chrono-inputs button{
+  background:linear-gradient(135deg,#ef4444,#b91c1c);
+  border:none;
+  padding:10px 15px;
+  border-radius:8px;
+  color:#fff;
+  cursor:pointer;
+  transition:0.25s;
+}
+
+.chrono-inputs button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 20px rgba(239,68,68,0.6);
+}
+
+/* RESULT */
+.chrono-result{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:20px;
+  animation:fadeIn 0.6s ease;
+}
+
+/* LEFT */
+.chrono-left h1{
+  font-size:64px;
+  margin:0;
+  letter-spacing:1px;
+}
+
+.chrono-left h2{
+  font-size:32px;
+  margin:5px 0;
   color:#cbd5f5;
 }
+
+.chrono-meta{
+  margin-top:10px;
+  color:#94a3b8;
+  font-size:14px;
+}
+
+/* RIGHT */
+.chrono-right{
+  text-align:right;
+}
+
+.chrono-right span{
+  color:#ef4444;
+  font-size:18px;
+}
+
+.chrono-right h1{
+  color:#ef4444;
+  font-size:60px;
+  margin:5px 0;
+
+  text-shadow:
+    0 0 10px rgba(239,68,68,0.6),
+    0 0 25px rgba(239,68,68,0.4);
+
+  animation:pulseGlow 2s infinite alternate;
+}
+
+/* ✨ ANIMATION */
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+@keyframes pulseGlow{
+  from{opacity:0.7;}
+  to{opacity:1;}
+}
+
 </style>
 `;
 
-// ✅ LIVE CLOCK (safe)
-setInterval(()=>{
-  const el=document.getElementById('sa-live');
-  if(el) el.innerText=new Date().toLocaleTimeString();
-},1000);
 
+// 🔹 INIT
+INITS['age'] = () => {
+  if(window.saTimer) clearInterval(window.saTimer);
 
-// ✅ RESET
-window.resetAge=function(){
-  ['day','month','year'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.value='';
-  });
-  document.getElementById('ag-result').innerHTML='';
+  const update = () => {
+    const now = new Date();
+
+    document.getElementById('sa-live').textContent =
+      now.toLocaleTimeString();
+
+    document.getElementById('sa-week').textContent =
+      now.toLocaleDateString(undefined,{
+        weekday:'long',
+        year:'numeric',
+        month:'long',
+        day:'numeric'
+      });
+  };
+
+  update();
+  window.saTimer = setInterval(update,1000);
 };
 
 
-// ✅ CALCULATE
-window.calcAge=function(){
+// 🔹 CALCULATE
+window.calcAge = function(){
 
-  const d=parseInt(document.getElementById('day').value);
-  const m=parseInt(document.getElementById('month').value);
-  const y=parseInt(document.getElementById('year').value);
+  const d=+day.value;
+  const m=+month.value;
+  const y=+year.value;
 
-  // ✅ Validation
-  if(!d || !m || !y){
-    alert("Please enter complete date");
-    return;
-  }
-
-  if(m<1 || m>12 || d<1 || d>31){
-    alert("Invalid date");
-    return;
-  }
+  if(!d||!m||!y) return alert("Enter full date");
 
   const dob=new Date(y,m-1,d);
-  if(isNaN(dob.getTime())){
-    alert("Invalid date");
-    return;
-  }
+  const now=new Date();
 
-  const ref=new Date();
+  let yy=now.getFullYear()-dob.getFullYear();
+  let mm=now.getMonth()-dob.getMonth();
+  let dd=now.getDate()-dob.getDate();
 
-  let yy=ref.getFullYear()-dob.getFullYear();
-  let mm=ref.getMonth()-dob.getMonth();
-  let dd=ref.getDate()-dob.getDate();
+  if(dd<0){ mm--; dd+=new Date(now.getFullYear(),now.getMonth(),0).getDate(); }
+  if(mm<0){ yy--; mm+=12; }
 
-  if(dd<0){
-    mm--;
-    dd+=new Date(ref.getFullYear(),ref.getMonth(),0).getDate();
-  }
-  if(mm<0){
-    yy--;
-    mm+=12;
-  }
-
-  const totalDays=Math.floor((ref-dob)/86400000);
-
-  // 🎂 NEXT BIRTHDAY
   const next=new Date(
-    ref.getFullYear()+
-    (ref.getMonth()>dob.getMonth()||(ref.getMonth()===dob.getMonth()&&ref.getDate()>=dob.getDate())?1:0),
+    now.getFullYear()+
+    (now.getMonth()>dob.getMonth()||(now.getMonth()===dob.getMonth()&&now.getDate()>=dob.getDate())?1:0),
     dob.getMonth(),
     dob.getDate()
   );
 
-  const nextDays=Math.floor((next-ref)/86400000);
-
-  // 🇧🇩 Bangla
-  const bangla=new Intl.DateTimeFormat('bn-BD',{
-    day:'numeric',month:'long',year:'numeric'
-  }).format(ref);
-
-  // 🌙 Hijri
-  const hijri=new Intl.DateTimeFormat('ar-TN-u-ca-islamic',{
-    day:'numeric',month:'long',year:'numeric'
-  }).format(ref);
+  const nextDays=Math.floor((next-now)/86400000);
 
   document.getElementById('ag-result').innerHTML=`
-  <div class="sa-result">
+  <div class="chrono-result">
 
-    <div class="sa-main">
+    <div class="chrono-left">
       <h1>${yy} YEARS</h1>
-      <h3>${mm} MONTHS ${dd} DAYS</h3>
+      <h2>${mm} MONTHS ${dd} DAYS</h2>
+
+      <div class="chrono-meta">
+        Born on: ${dob.toDateString()}
+      </div>
     </div>
 
-    <div class="sa-next">
-      Next birthday in <b>${nextDays} days</b>
+    <div class="chrono-right">
+      <span>Next birthday</span>
+      <h1>${nextDays} DAYS</h1>
     </div>
 
-    <div class="sa-grid">
-      <p>Total Days: ${totalDays.toLocaleString()}</p>
-      <p>Bangla Date: ${bangla}</p>
-      <p>Hijri Date: ${hijri}</p>
-    </div>
-
-  </div>
-  `;
+  </div>`;
 };
+
+
+// 🔹 RESET
+window.resetAge = function(){
+  day.value = month.value = year.value = '';
+  document.getElementById('ag-result').innerHTML='';
+};
+
+
+// 🔹 CLEANUP
+function closeTool(){
+  document.getElementById('home-view').style.display='';
+  document.getElementById('tool-view').innerHTML='';
+
+  if(window.saTimer){
+    clearInterval(window.saTimer);
+    window.saTimer=null;
+  }
+}
 // ══════════════════════════════════════════════
 // 3. BANGLA LOGO MAKER
 // ══════════════════════════════════════════════
